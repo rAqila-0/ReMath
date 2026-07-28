@@ -1,0 +1,182 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/Scenes/StageMenu.unity
+    guid: 51ee5d098224107468bf00da8d62a814
+  - enabled: 1
+    path: Assets/Scenes/StagePerjumlahan.unity
+    guid: 5ad5fb5700cdcc24b88b201e55cda63f
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Tutorial_Jumlah.unity
+    guid: a5c8f30eb8447a64782dc823b158a0c1
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-1.unity
+    guid: cc47379e1dd18864cbe7bba24b6f6364
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-2.unity
+    guid: e482be60c615b7d4f90d085cfecc5b95
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-3.unity
+    guid: 8d829a9e439e801418af7035741fa71f
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-4.unity
+    guid: 3ced3eada864f1248ab0cc21664cd18f
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-5.unity
+    guid: c20fc3249cf44df46b1d6c3329ae681d
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-6.unity
+    guid: f9e025867a11dc1478eb6aef267bf73d
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-7.unity
+    guid: 61e98ee43833c45488d907a3c8d025de
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-8.unity
+    guid: 3e07cab88e17c5b4ab24bbb6e885ea81
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-9.unity
+    guid: 3db7c3a4b7fa76944adc032d81756ffd
+  - enabled: 1
+    path: Assets/Scenes/Level_Perjumlahan/Jumlah_Level-10.unity
+    guid: 1ccbe240fb1715448b5f933c389a5060
+  - enabled: 1
+    path: Assets/Scenes/StagePengurangan.unity
+    guid: e5a89a636cdd60549b18660ffbd5da5c
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-1.unity
+    guid: f85b16e676266a1488450d2f97dc5755
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-2.unity
+    guid: 8fe98f809a892ba479be50b0d153ec41
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-3.unity
+    guid: b79536a8382a03d46946beae80c97700
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-4.unity
+    guid: 8dac19f322689674da54763626a92aa5
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-5.unity
+    guid: 75b94c8e339f6b64c96321cebf522fed
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-6.unity
+    guid: b037e81d8c381b94d801248829346482
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-7.unity
+    guid: 73f89aa6f44e7c448aa86a2236c3224d
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-8.unity
+    guid: 82ee3e541ba964b4db74c3129e55fb2e
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-9.unity
+    guid: 60e41733704498140bd40b19b4d0c3f0
+  - enabled: 1
+    path: Assets/Scenes/Level_Pengurangan/Kurang_Level-10.unity
+    guid: 1db0554115dd8b34a9b5e372cb26158c
+  - enabled: 1
+    path: Assets/Scenes/StagePerkalian.unity
+    guid: 9e306d154e37f134c9a94e1793d455ed
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-1.unity
+    guid: 5620a9aef2e8a7949b54e097ae82ee0d
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-2.unity
+    guid: 7be430672565fde4680ad08636f8edd1
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-3.unity
+    guid: a7322ae8ba1ab8640b3f0d441d14214d
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-4.unity
+    guid: 4284f1436dc96654eb7fe9f526ec1a1d
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-5.unity
+    guid: 448404b3c1363444291ffb353cd7385e
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-6.unity
+    guid: e0e97edd71f0aa945a0b68d6d1bdc06a
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-7.unity
+    guid: 5683c432781435e43ab331d4ca12e840
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-8.unity
+    guid: be47b3144769f0d48812e359589e268d
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-9.unity
+    guid: 1d07c9686b6af8b4e97dbf000b446a69
+  - enabled: 1
+    path: Assets/Scenes/Level_Perkalian/Kali-Level-10.unity
+    guid: f4ceafa7cb2e2324589d8fbbf4c30869
+  - enabled: 1
+    path: Assets/Scenes/StagePembagian.unity
+    guid: afa99466b1b09af4f9fe2fae2983cbd8
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-1.unity
+    guid: 8e768fcb52c308a41827b74d302355d3
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-2.unity
+    guid: 90276bfa9522522478028961d50a2113
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-3.unity
+    guid: 1621fe802ed200c469e85df70989638d
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-4.unity
+    guid: bf89aa058f93b0d42891584fb0118cb5
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-5.unity
+    guid: 1958e71270fba6648bc33f5688a3b6b2
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-6.unity
+    guid: 8c12580689e8a814c8fac272bd7501da
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-7.unity
+    guid: 63e88017b8accbe468634eb97bcfd7d7
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-8.unity
+    guid: 8a512a1f3d9fdff43a8b46dca9e0df15
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-9.unity
+    guid: 06be01698e2a40047bf86db1e672c017
+  - enabled: 1
+    path: Assets/Scenes/Level_Pembagian/Bagi-Level-10.unity
+    guid: aaf5d01bbe5df4346a48f23d25d9dbe4
+  - enabled: 1
+    path: Assets/Scenes/StageCampuran.unity
+    guid: 203ca8fe3b923bd40ad7ea79c58c7d2f
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-1.unity
+    guid: ac0b4d14f68bbb44e97bcde43aa3c434
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-2.unity
+    guid: b7fb5703af1edf544818a81222fc97a1
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-3.unity
+    guid: eac54571ba151864ab491581f24b024f
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-4.unity
+    guid: 039d75106c3ed0a42a18ceba0f95c2ce
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-5.unity
+    guid: d13693bfd3460194e9cb15e875170b52
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-6.unity
+    guid: 2b77c22e99da4d24d9281434bb7af52a
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-7.unity
+    guid: 5ee02b08e76ccd04f93a9425b1a7fd2b
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-8.unity
+    guid: e765dfcfda70ba141848dd097c163744
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-9.unity
+    guid: f752c2d2a1d22154c8c09753d8d0d601
+  - enabled: 1
+    path: Assets/Scenes/Level_Campuran/Campur-Level-10.unity
+    guid: 8dd5d83e407be754299d58d00ee90f3b
+  m_configObjects: {}
