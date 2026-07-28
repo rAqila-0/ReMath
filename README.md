@@ -1,4 +1,4 @@
 # ReMath
 Aplikasi Game Edukasi Matematika
 
-Link Download Aplikasi : 
+Link Download Aplikasi : https://github.com/rAqila-0/ReMath/releases
