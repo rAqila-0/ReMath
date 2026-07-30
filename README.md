@@ -1,4 +1,4 @@
-# ReMath
+# Re:Math
 Aplikasi Game Edukasi Matematika
 
 Untuk materi di Game ini berfokus pada Operasi Hitung Dasar seperti Perjumlahan, Pengurangan, Perkalian, Pembagian, dan Campuran.
