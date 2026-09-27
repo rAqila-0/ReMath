@@ -8,7 +8,6 @@ Fitur yang tersedia :
 - Stage Pengurangan
 - Stage Perkalian
 - Stage Pembagian
-- Stage Campuran
 
 Genre Game : Turn Based
 
