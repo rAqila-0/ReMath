@@ -1352,7 +1352,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stageType: 0
-  levelScenePrefix: Jumlah_Level-
+  levelScenePrefix: TB-Jumlah-Lv-
   levelButtons:
   - levelNumber: 1
     levelButton: {fileID: 495737705}
