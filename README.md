@@ -10,11 +10,6 @@ Fitur yang tersedia :
 - Stage Pembagian
 - Stage Campuran
 
-Jenis Game Untuk setiap Stage :
-- Stage Perjumlahan = Drag & Drop
-- Stage Pengurangan = Turn Base
-- Stage Perkalian =
-- Stage Pembagian =
-- Stage Campuran = Simulasi Transaksi Perdagangan
+Genre Game : Turn Based
 
 Link Download Aplikasi : https://github.com/rAqila-0/ReMath/releases
