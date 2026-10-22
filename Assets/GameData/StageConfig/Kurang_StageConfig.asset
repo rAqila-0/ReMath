@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68f72c1c51d9dac45a9cafae15801002, type: 3}
+  m_Name: Kurang_StageConfig
+  m_EditorClassIdentifier: 
+  operation: 1
+  battleSceneName: TB-Kurang
+  stageSelectionSceneName: StagePengurangan
+  levelConfigs:
+  - {fileID: 11400000, guid: c67ec66e50bcd264ab620a2de86e70d6, type: 2}
+  - {fileID: 11400000, guid: 6ffd523918174df47ab9af3c1992a011, type: 2}
+  - {fileID: 11400000, guid: 5883f1301d44eb74c87813400a51c267, type: 2}
+  - {fileID: 11400000, guid: e910b99a6af9ac347be990aa6f1968e9, type: 2}
+  - {fileID: 11400000, guid: 772d030f3741d3647aa496c8750d8df6, type: 2}
+  - {fileID: 11400000, guid: f90edd3921f3a34448f4116aeb1d9c30, type: 2}
+  - {fileID: 11400000, guid: c435b35e1b796404aa08c1257d0ffdd0, type: 2}
+  - {fileID: 11400000, guid: b6bbba69e8f9d4e4b9ccc63e4d32807a, type: 2}
+  - {fileID: 11400000, guid: 20e4b77d14b295240a8eeaf99962541f, type: 2}
+  - {fileID: 11400000, guid: d7e4ab04e97c3584d934037ddb672871, type: 2}

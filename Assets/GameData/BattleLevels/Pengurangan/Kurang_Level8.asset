@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfd893613a0eab247bcae2d07da3a8bd, type: 3}
+  m_Name: Kurang_Level8
+  m_EditorClassIdentifier: 
+  levelNumber: 8
+  operation: 1
+  isPlayable: 1
+  enemyName: Naga Merah
+  enemySprite: {fileID: 21300000, guid: d746d2a4d0cdbc744b3d289f5616c588, type: 3}
+  playerMaxLives: 5
+  enemyMaxLives: 5
+  basicRange:
+    minA: 50
+    maxA: 99
+    minB: 50
+    maxB: 99
+  mediumRange:
+    minA: 400
+    maxA: 899
+    minB: 400
+    maxB: 899
+  advancedRange:
+    minA: 2800
+    maxA: 4399
+    minB: 2800
+    maxB: 4399
+  defenseRange:
+    minA: 1
+    maxA: 10
+    minB: 1
+    maxB: 10

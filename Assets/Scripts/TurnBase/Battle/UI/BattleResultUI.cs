@@ -64,6 +64,11 @@ public class BattleResultUI : MonoBehaviour
     private TMP_Text defeatLevelText;
 
 
+
+    private BattleStageConfig
+    runtimeStageConfig;
+
+
     //==================================================
     // STATUS
     //==================================================
@@ -191,55 +196,83 @@ public class BattleResultUI : MonoBehaviour
 
     public void NextLevel()
     {
-        if (levelConfig == null)
+        if (
+            levelConfig == null ||
+            runtimeStageConfig == null
+        )
+        {
+            Debug.LogError(
+                "BattleResultUI: " +
+                "Level/Stage Config belum tersedia."
+            );
+
             return;
-
-
-        int currentLevel =
-            levelConfig.levelNumber;
-
-
-        //==============================================
-        // MASIH ADA LEVEL BERIKUTNYA
-        //==============================================
-
-        if (currentLevel < maxLevel)
-        {
-            int nextLevel =
-                currentLevel + 1;
-
-
-            string nextScene =
-                levelScenePrefix +
-                nextLevel;
-
-
-            Debug.Log(
-                "Load scene: " +
-                nextScene
-            );
-
-
-            SceneManager.LoadScene(
-                nextScene
-            );
         }
 
+
+        int nextLevel =
+            levelConfig.levelNumber + 1;
+
+
         //==============================================
-        // LEVEL TERAKHIR
+        // STAGE SELESAI
         //==============================================
-        else
+
+        if (
+            nextLevel >
+            runtimeStageConfig.MaxLevel
+        )
         {
-            Debug.Log(
-                "Level terakhir selesai. " +
-                "Kembali ke Stage Selection."
-            );
+            BackToStageSelection();
 
-
-            SceneManager.LoadScene(
-                stageSelectionScene
-            );
+            return;
         }
+
+
+        //==============================================
+        // CEK CONFIG NEXT LEVEL
+        //==============================================
+
+        BattleLevelConfig nextConfig =
+            runtimeStageConfig
+                .GetLevelConfig(
+                    nextLevel
+                );
+
+
+        if (nextConfig == null)
+        {
+            Debug.LogWarning(
+                "BattleResultUI: " +
+                "Next Level belum tersedia."
+            );
+
+            BackToStageSelection();
+
+            return;
+        }
+
+
+        //==============================================
+        // SAVE SELECTION
+        //==============================================
+
+        BattleSelectionData
+            .SetSelectedLevel(
+                nextLevel
+            );
+
+
+        //==============================================
+        // LOAD SCENE YANG SAMA
+        //==============================================
+
+        UnityEngine.SceneManagement
+            .SceneManager
+            .LoadScene(
+                runtimeStageConfig
+                    .BattleSceneName
+            );
     }
 
 
@@ -274,12 +307,25 @@ public class BattleResultUI : MonoBehaviour
 
     public void BackToStageSelection()
     {
-        SceneManager.LoadScene(
-            stageSelectionScene
-        );
+        if (runtimeStageConfig == null)
+        {
+            Debug.LogError(
+                "BattleResultUI: " +
+                "Stage Config tidak tersedia."
+            );
+
+            return;
+        }
+
+
+        UnityEngine.SceneManagement
+            .SceneManager
+            .LoadScene(
+                runtimeStageConfig
+                    .StageSelectionSceneName
+            );
     }
-
-
+    
     //==================================================
     // RESET RESULT STATE
     //==================================================
@@ -288,4 +334,27 @@ public class BattleResultUI : MonoBehaviour
     {
         progressSaved = false;
     }
+
+    //==================================================
+    // INITIALIZE RUNTIME
+    //==================================================
+
+    public void InitializeRuntime(
+        BattleLevelConfig currentLevelConfig,
+        BattleStageConfig currentStageConfig
+    )
+    {
+        levelConfig =
+            currentLevelConfig;
+
+
+        runtimeStageConfig =
+            currentStageConfig;
+
+
+        progressSaved =
+            false;
+    }
+
+    
 }

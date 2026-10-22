@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfd893613a0eab247bcae2d07da3a8bd, type: 3}
+  m_Name: Kurang_Level9
+  m_EditorClassIdentifier: 
+  levelNumber: 9
+  operation: 1
+  isPlayable: 1
+  enemyName: Naga Ungu
+  enemySprite: {fileID: 21300000, guid: 386f25d6eedd5da4ba962f0fad9009c1, type: 3}
+  playerMaxLives: 5
+  enemyMaxLives: 5
+  basicRange:
+    minA: 60
+    maxA: 99
+    minB: 60
+    maxB: 99
+  mediumRange:
+    minA: 500
+    maxA: 949
+    minB: 500
+    maxB: 949
+  advancedRange:
+    minA: 3000
+    maxA: 4699
+    minB: 3000
+    maxB: 4699
+  defenseRange:
+    minA: 1
+    maxA: 10
+    minB: 1
+    maxB: 10

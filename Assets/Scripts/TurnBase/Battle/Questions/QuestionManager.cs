@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class QuestionManager : MonoBehaviour
@@ -11,55 +9,40 @@ public class QuestionManager : MonoBehaviour
     [Header("References")]
 
     [SerializeField]
-    private BattleLevelConfig levelConfig;
+    private QuestionDisplayController
+        questionDisplayController;
 
     [SerializeField]
-    private BattleUIManager battleUI;
+    private AdaptiveDefenseManager
+        adaptiveDefenseManager;
 
 
     //==================================================
-    // QUESTION SESSION
+    // RUNTIME
     //==================================================
 
-    private QuestionSession questionSession =
-        new QuestionSession();
+    private BattleLevelConfig levelConfig;
 
 
-    //==================================================
-    // CURRENT QUESTION
-    //==================================================
+    private readonly QuestionSession
+        questionSession =
+            new QuestionSession();
 
-    private int currentOperandA;
-    private int currentOperandB;
-    private int currentCorrectAnswer;
 
-    private MathOperation currentOperation;
-    private SpellTier currentSpellTier;
-
-    private bool hasCurrentQuestion = false;
+    private QuestionData
+        currentQuestion;
 
 
     //==================================================
     // PROPERTIES
     //==================================================
 
-    public int CurrentOperandA =>
-        currentOperandA;
+    public QuestionData CurrentQuestion =>
+        currentQuestion;
 
-    public int CurrentOperandB =>
-        currentOperandB;
 
-    public int CurrentCorrectAnswer =>
-        currentCorrectAnswer;
-
-    public MathOperation CurrentOperation =>
-        currentOperation;
-
-    public SpellTier CurrentSpellTier =>
-        currentSpellTier;
-
-    public bool HasCurrentQuestion =>
-        hasCurrentQuestion;
+    public bool HasActiveQuestion =>
+        currentQuestion != null;
 
 
     //==================================================
@@ -70,23 +53,14 @@ public class QuestionManager : MonoBehaviour
         BattleLevelConfig config
     )
     {
-        if (config == null)
-        {
-            Debug.LogError(
-                "QuestionManager: " +
-                "BattleLevelConfig tidak boleh null."
-            );
-
-            return;
-        }
+        levelConfig =
+            config;
 
 
-        levelConfig = config;
-
-
-        // Scene / level baru
-        // = session soal baru.
         StartNewSession();
+
+
+        ClearCurrentQuestion();
     }
 
 
@@ -96,34 +70,22 @@ public class QuestionManager : MonoBehaviour
 
     public void StartNewSession()
     {
-        questionSession.StartNewSession();
-
-        ClearCurrentQuestion();
-
-
-        Debug.Log(
-            "Question Session baru dibuat."
-        );
+        questionSession
+            .StartNewSession();
     }
 
 
     //==================================================
-    // RETRY SESSION
+    // RETRY SAME SESSION
     //==================================================
 
     public void RestartSessionAttempt()
     {
-        // History soal TIDAK dihapus.
-        // Hanya index dikembalikan ke awal.
-        questionSession.RestartAttempt();
+        questionSession
+            .RestartAttempt();
+
 
         ClearCurrentQuestion();
-
-
-        Debug.Log(
-            "Question Session diulang. " +
-            "Soal lama akan digunakan kembali."
-        );
     }
 
 
@@ -131,7 +93,7 @@ public class QuestionManager : MonoBehaviour
     // GENERATE QUESTION
     //==================================================
 
-    public bool GenerateQuestion(
+    public QuestionData GenerateQuestion(
         SpellTier spellTier
     )
     {
@@ -139,67 +101,53 @@ public class QuestionManager : MonoBehaviour
         {
             Debug.LogError(
                 "QuestionManager: " +
-                "Level Config belum diisi."
+                "BattleLevelConfig belum diinisialisasi."
             );
 
-            return false;
+            return null;
         }
 
 
-        //==================================================
-        // CEK APAKAH ADA SOAL LAMA
-        //==================================================
+        //==============================================
+        // REUSE QUESTION HISTORY
+        //==============================================
 
         if (
-            questionSession.TryGetRecordedQuestion(
-                spellTier,
-                out BattleQuestion recordedQuestion
-            )
+            questionSession
+                .TryGetRecordedQuestion(
+                    spellTier,
+                    out QuestionData
+                        recordedQuestion
+                )
         )
         {
-            ApplyQuestion(
-                recordedQuestion
-            );
+            if (
+                ApplyQuestion(
+                    recordedQuestion
+                )
+            )
+            {
+                Debug.Log(
+                    "QuestionManager: " +
+                    "Menggunakan soal dari session history."
+                );
 
 
-            Debug.Log(
-                $"Mengulang soal [{spellTier}] : " +
-                $"{currentOperandA} " +
-                $"{GetOperatorSymbol(currentOperation)} " +
-                $"{currentOperandB}"
-            );
+                return recordedQuestion;
+            }
 
 
-            return true;
+            return null;
         }
 
 
-        //==================================================
-        // TIDAK ADA SOAL LAMA
-        // → BUAT SOAL BARU
-        //==================================================
+        //==============================================
+        // CREATE NEW QUESTION
+        //==============================================
 
-        QuestionRange range =
-            GetQuestionRange(
+        QuestionData newQuestion =
+            CreateQuestion(
                 spellTier
-            );
-
-
-        if (range == null)
-        {
-            Debug.LogError(
-                $"QuestionManager: Range untuk " +
-                $"{spellTier} tidak ditemukan."
-            );
-
-            return false;
-        }
-
-
-        BattleQuestion newQuestion =
-            GenerateNewQuestion(
-                spellTier,
-                range
             );
 
 
@@ -210,78 +158,109 @@ public class QuestionManager : MonoBehaviour
                 "Gagal membuat soal."
             );
 
-            return false;
+            return null;
         }
 
 
-        // Simpan ke session.
-        questionSession.RecordNewQuestion(
-            newQuestion
-        );
+        //==============================================
+        // DISPLAY
+        //==============================================
+
+        if (
+            !ApplyQuestion(
+                newQuestion
+            )
+        )
+        {
+            return null;
+        }
 
 
-        ApplyQuestion(
-            newQuestion
-        );
+        //==============================================
+        // RECORD HISTORY
+        //==============================================
+
+        questionSession
+            .RecordNewQuestion(
+                newQuestion
+            );
 
 
         Debug.Log(
-            $"Soal BARU [{spellTier}] : " +
-            $"{currentOperandA} " +
-            $"{GetOperatorSymbol(currentOperation)} " +
-            $"{currentOperandB} = " +
-            $"{currentCorrectAnswer}"
+            "QuestionManager: " +
+            FormatDebugQuestion(
+                newQuestion
+            )
         );
 
 
-        return true;
+        return newQuestion;
     }
 
 
     //==================================================
-    // GENERATE NEW QUESTION
+    // CREATE QUESTION
     //==================================================
 
-    private BattleQuestion GenerateNewQuestion(
-        SpellTier spellTier,
-        QuestionRange range
+    private QuestionData CreateQuestion(
+        SpellTier spellTier
     )
     {
-        MathOperation operation =
-            levelConfig.operation;
+        DefenseDifficulty
+            defenseDifficulty =
+                DefenseDifficulty.Normal;
 
 
-        switch (operation)
+        if (
+            spellTier ==
+            SpellTier.Defense
+        )
+        {
+            if (
+                adaptiveDefenseManager !=
+                null
+            )
+            {
+                defenseDifficulty =
+                    adaptiveDefenseManager
+                        .CurrentDifficulty;
+            }
+        }
+
+
+        switch (
+            levelConfig.operation
+        )
         {
             case MathOperation.Addition:
 
-                return GenerateAddition(
+                return CreateAdditionQuestion(
                     spellTier,
-                    range
+                    defenseDifficulty
                 );
 
 
             case MathOperation.Subtraction:
 
-                return GenerateSubtraction(
+                return CreateSubtractionQuestion(
                     spellTier,
-                    range
+                    defenseDifficulty
                 );
 
 
             case MathOperation.Multiplication:
 
-                return GenerateMultiplication(
+                return CreateMultiplicationQuestion(
                     spellTier,
-                    range
+                    defenseDifficulty
                 );
 
 
             case MathOperation.Division:
 
-                return GenerateDivision(
+                return CreateDivisionQuestion(
                     spellTier,
-                    range
+                    defenseDifficulty
                 );
 
 
@@ -296,146 +275,612 @@ public class QuestionManager : MonoBehaviour
     // ADDITION
     //==================================================
 
-    private BattleQuestion GenerateAddition(
+    private QuestionData CreateAdditionQuestion(
         SpellTier spellTier,
-        QuestionRange range
+        DefenseDifficulty difficulty
     )
     {
-        int a =
-            GetRandomValue(
-                range.minA,
-                range.maxA
+        GetAddSubRange(
+            spellTier,
+            difficulty,
+            true,
+            out int minA,
+            out int maxA,
+            out int minB,
+            out int maxB
+        );
+
+
+        int operandA =
+            Random.Range(
+                minA,
+                maxA + 1
             );
 
-        int b =
-            GetRandomValue(
-                range.minB,
-                range.maxB
+
+        int operandB =
+            Random.Range(
+                minB,
+                maxB + 1
             );
 
 
-        return new BattleQuestion(
-            a,
-            b,
-            a + b,
+        int answer =
+            operandA +
+            operandB;
+
+
+        //==================================================
+        // JANGAN IZINKAN HASIL 5 DIGIT
+        //==================================================
+
+        int safety = 0;
+
+
+        while (
+            answer > 9999 &&
+            safety < 100
+        )
+        {
+            operandA =
+                Random.Range(
+                    minA,
+                    maxA + 1
+                );
+
+
+            operandB =
+                Random.Range(
+                    minB,
+                    maxB + 1
+                );
+
+
+            answer =
+                operandA +
+                operandB;
+
+
+            safety++;
+        }
+
+
+        //==================================================
+        // FALLBACK
+        //==================================================
+
+        if (answer > 9999)
+        {
+            Debug.LogWarning(
+                "QuestionManager: " +
+                "Range Addition menghasilkan 5 digit. " +
+                "Menggunakan fallback aman."
+            );
+
+
+            operandA = 4000;
+
+            operandB = 3000;
+
+            answer = 7000;
+        }
+
+
+        return new QuestionData(
+            operandA,
+            operandB,
+            answer,
             MathOperation.Addition,
-            spellTier
+            spellTier,
+            difficulty
         );
     }
-
 
     //==================================================
     // SUBTRACTION
     //==================================================
 
-    private BattleQuestion GenerateSubtraction(
+    private QuestionData CreateSubtractionQuestion(
         SpellTier spellTier,
-        QuestionRange range
+        DefenseDifficulty difficulty
     )
     {
-        int a =
-            GetRandomValue(
-                range.minA,
-                range.maxA
+        GetAddSubRange(
+            spellTier,
+            difficulty,
+            false,
+            out int minA,
+            out int maxA,
+            out int minB,
+            out int maxB
+        );
+
+
+        int operandA =
+            Random.Range(
+                minA,
+                maxA + 1
             );
 
-        int b =
-            GetRandomValue(
-                range.minB,
-                range.maxB
+
+        int operandB =
+            Random.Range(
+                minB,
+                maxB + 1
             );
 
 
-        // Cegah hasil negatif.
-        if (a < b)
+        //==================================================
+        // TIDAK BOLEH NEGATIF
+        //==================================================
+
+        if (operandA < operandB)
         {
-            int temporary = a;
+            int temp =
+                operandA;
 
-            a = b;
-            b = temporary;
+            operandA =
+                operandB;
+
+            operandB =
+                temp;
         }
 
 
-        return new BattleQuestion(
-            a,
-            b,
-            a - b,
+        int answer =
+            operandA -
+            operandB;
+
+
+        return new QuestionData(
+            operandA,
+            operandB,
+            answer,
             MathOperation.Subtraction,
-            spellTier
+            spellTier,
+            difficulty
         );
     }
 
+    //==================================================
+    // ADD / SUB RANGE
+    //==================================================
+
+    private void GetAddSubRange(
+        SpellTier spellTier,
+        DefenseDifficulty difficulty,
+        bool isAddition,
+        out int minA,
+        out int maxA,
+        out int minB,
+        out int maxB
+    )
+    {
+        //==================================================
+        // DEFENSE = ADAPTIVE
+        //==================================================
+
+        if (
+            spellTier ==
+            SpellTier.Defense
+        )
+        {
+            switch (difficulty)
+            {
+                //==========================================
+                // EASY = 2 DIGIT
+                //==========================================
+
+                case DefenseDifficulty.Easy:
+
+                    minA = 10;
+                    maxA = 99;
+
+                    minB = 10;
+                    maxB = 99;
+
+                    return;
+
+
+                //==========================================
+                // NORMAL = 3 DIGIT
+                //==========================================
+
+                case DefenseDifficulty.Normal:
+
+                    minA = 100;
+                    maxA = 999;
+
+                    minB = 100;
+                    maxB = 999;
+
+                    return;
+
+
+                //==========================================
+                // HARD = 4 DIGIT
+                //==========================================
+
+                case DefenseDifficulty.Hard:
+
+                    minA = 1000;
+
+                    maxA =
+                        isAddition
+                            ? 4999
+                            : 9999;
+
+
+                    minB = 1000;
+
+                    maxB =
+                        isAddition
+                            ? 4999
+                            : 9999;
+
+                    return;
+            }
+        }
+
+
+        //==================================================
+        // ATTACK = BACA BATTLE LEVEL CONFIG
+        //==================================================
+
+        QuestionRange range =
+            GetAttackQuestionRange(
+                spellTier
+            );
+
+
+        if (range != null)
+        {
+            minA =
+                range.minA;
+
+            maxA =
+                range.maxA;
+
+            minB =
+                range.minB;
+
+            maxB =
+                range.maxB;
+
+
+            return;
+        }
+
+
+        //==================================================
+        // FALLBACK
+        //==================================================
+
+        Debug.LogWarning(
+            "QuestionManager: " +
+            "Attack Question Range tidak ditemukan. " +
+            "Menggunakan range Basic."
+        );
+
+
+        minA = 10;
+        maxA = 99;
+
+        minB = 10;
+        maxB = 99;
+    }
+
+    //==================================================
+    // GET ATTACK QUESTION RANGE
+    //==================================================
+
+    private QuestionRange GetAttackQuestionRange(
+        SpellTier spellTier
+    )
+    {
+        if (levelConfig == null)
+        {
+            return null;
+        }
+
+
+        switch (spellTier)
+        {
+            case SpellTier.Basic:
+
+                return levelConfig
+                    .basicRange;
+
+
+            case SpellTier.Medium:
+
+                return levelConfig
+                    .mediumRange;
+
+
+            case SpellTier.Advanced:
+
+                return levelConfig
+                    .advancedRange;
+
+
+            default:
+
+                return null;
+        }
+    }
 
     //==================================================
     // MULTIPLICATION
     //==================================================
 
-    private BattleQuestion GenerateMultiplication(
+    private QuestionData CreateMultiplicationQuestion(
         SpellTier spellTier,
-        QuestionRange range
+        DefenseDifficulty difficulty
     )
     {
-        int a =
-            GetRandomValue(
-                range.minA,
-                range.maxA
-            );
-
-        int b =
-            GetRandomValue(
-                range.minB,
-                range.maxB
+        int[] allowedTables =
+            GetAllowedTables(
+                spellTier,
+                difficulty
             );
 
 
-        return new BattleQuestion(
-            a,
-            b,
-            a * b,
+        int table =
+            allowedTables[
+                Random.Range(
+                    0,
+                    allowedTables.Length
+                )
+            ];
+
+
+        //==================================================
+        // MULTIPLIER
+        //==================================================
+
+        int maxMultiplier = 10;
+
+
+        // Attack mengikuti progression level.
+        if (
+            spellTier != SpellTier.Defense &&
+            levelConfig != null
+        )
+        {
+            maxMultiplier =
+                Mathf.Clamp(
+                    levelConfig.maxFactMultiplier,
+                    1,
+                    10
+                );
+        }
+
+
+        // Defense TIDAK mengikuti level.
+        // Defense mengikuti Easy / Normal / Hard.
+        int multiplier =
+            Random.Range(
+                1,
+                maxMultiplier + 1
+            );
+
+
+        int operandA =
+            table;
+
+
+        int operandB =
+            multiplier;
+
+
+        int answer =
+            operandA *
+            operandB;
+
+
+        return new QuestionData(
+            operandA,
+            operandB,
+            answer,
             MathOperation.Multiplication,
-            spellTier
+            spellTier,
+            difficulty
         );
     }
-
 
     //==================================================
     // DIVISION
     //==================================================
 
-    private BattleQuestion GenerateDivision(
+    private QuestionData CreateDivisionQuestion(
         SpellTier spellTier,
-        QuestionRange range
+        DefenseDifficulty difficulty
     )
     {
-        // Range A = hasil bagi
-        // Range B = pembagi.
+        //==================================================
+        // PILIH PEMBAGI
+        //==================================================
 
-        int quotient =
-            GetRandomValue(
-                range.minA,
-                range.maxA
+        int[] allowedTables =
+            GetAllowedTables(
+                spellTier,
+                difficulty
             );
 
 
         int divisor =
-            GetRandomValue(
-                Mathf.Max(1, range.minB),
-                Mathf.Max(1, range.maxB)
+            allowedTables[
+                Random.Range(
+                    0,
+                    allowedTables.Length
+                )
+            ];
+
+
+        //==================================================
+        // QUOTIENT / HASIL BAGI
+        //==================================================
+
+        int maxQuotient = 10;
+
+
+        // Attack mengikuti progression level.
+        if (
+            spellTier != SpellTier.Defense &&
+            levelConfig != null
+        )
+        {
+            maxQuotient =
+                Mathf.Clamp(
+                    levelConfig.maxFactMultiplier,
+                    1,
+                    10
+                );
+        }
+
+
+        // Defense tetap 1-10 karena
+        // kesulitannya dikontrol DDA.
+        int quotient =
+            Random.Range(
+                1,
+                maxQuotient + 1
             );
 
 
+        //==================================================
+        // DIVIDEND
+        //
+        // divisor × quotient
+        //
+        // Dengan cara ini pembagian
+        // selalu habis tanpa sisa.
+        //==================================================
+
         int dividend =
-            quotient *
-            divisor;
+            divisor *
+            quotient;
 
 
-        return new BattleQuestion(
+        //==================================================
+        // QUESTION DATA
+        //
+        // operandA = dividend
+        // operandB = divisor
+        // answer   = quotient
+        //==================================================
+
+        return new QuestionData(
             dividend,
             divisor,
             quotient,
             MathOperation.Division,
-            spellTier
+            spellTier,
+            difficulty
         );
+    }
+
+    //==================================================
+    // TABLE DIFFICULTY
+    //==================================================
+
+    private int[] GetAllowedTables(
+        SpellTier spellTier,
+        DefenseDifficulty difficulty
+    )
+    {
+        //==============================================
+        // DEFENSE
+        //==============================================
+
+        if (
+            spellTier ==
+            SpellTier.Defense
+        )
+        {
+            switch (difficulty)
+            {
+                case DefenseDifficulty.Easy:
+
+                    return new int[]
+                    {
+                        1,
+                        2,
+                        5,
+                        10
+                    };
+
+
+                case DefenseDifficulty.Normal:
+
+                    return new int[]
+                    {
+                        3,
+                        4,
+                        6
+                    };
+
+
+                case DefenseDifficulty.Hard:
+
+                    return new int[]
+                    {
+                        7,
+                        8,
+                        9
+                    };
+            }
+        }
+
+
+        //==============================================
+        // ATTACK
+        //==============================================
+
+        switch (spellTier)
+        {
+            case SpellTier.Basic:
+
+                return new int[]
+                {
+                    1,
+                    2,
+                    5,
+                    10
+                };
+
+
+            case SpellTier.Medium:
+
+                return new int[]
+                {
+                    3,
+                    4,
+                    6
+                };
+
+
+            case SpellTier.Advanced:
+
+                return new int[]
+                {
+                    7,
+                    8,
+                    9
+                };
+
+
+            default:
+
+                return new int[]
+                {
+                    1,
+                    2,
+                    5,
+                    10
+                };
+        }
     }
 
 
@@ -443,42 +888,46 @@ public class QuestionManager : MonoBehaviour
     // APPLY QUESTION
     //==================================================
 
-    private void ApplyQuestion(
-        BattleQuestion question
+    private bool ApplyQuestion(
+        QuestionData question
     )
     {
         if (question == null)
-            return;
+            return false;
 
 
-        currentOperandA =
-            question.operandA;
-
-        currentOperandB =
-            question.operandB;
-
-        currentCorrectAnswer =
-            question.correctAnswer;
-
-        currentOperation =
-            question.operation;
-
-        currentSpellTier =
-            question.spellTier;
-
-
-        hasCurrentQuestion = true;
-
-
-        // Tampilkan ke UI.
-        if (battleUI != null)
+        if (
+            questionDisplayController ==
+            null
+        )
         {
-            battleUI.SetVerticalQuestion(
-                currentOperandA,
-                currentOperandB,
-                currentOperation
+            Debug.LogError(
+                "QuestionManager: " +
+                "QuestionDisplayController belum diisi."
             );
+
+            return false;
         }
+
+
+        bool displayed =
+            questionDisplayController
+                .DisplayQuestion(
+                    question
+                );
+
+
+        if (!displayed)
+        {
+            return false;
+        }
+
+
+        currentQuestion =
+            question;
+
+
+        return true;
     }
 
 
@@ -490,160 +939,98 @@ public class QuestionManager : MonoBehaviour
         int playerAnswer
     )
     {
-        if (!hasCurrentQuestion)
+        if (currentQuestion == null)
         {
             Debug.LogWarning(
                 "QuestionManager: " +
-                "Belum ada soal aktif."
+                "Tidak ada soal aktif."
             );
 
             return false;
         }
 
 
-        bool isCorrect =
+        return
             playerAnswer ==
-            currentCorrectAnswer;
-
-
-        Debug.Log(
-            isCorrect
-                ? "Jawaban BENAR."
-                : $"Jawaban SALAH. " +
-                  $"Jawaban benar: " +
-                  $"{currentCorrectAnswer}"
-        );
-
-
-        return isCorrect;
+            currentQuestion.correctAnswer;
     }
 
 
     //==================================================
-    // GET RANGE
-    //==================================================
-
-    private QuestionRange GetQuestionRange(
-        SpellTier spellTier
-    )
-    {
-        switch (spellTier)
-        {
-            case SpellTier.Basic:
-
-                return levelConfig.basicRange;
-
-
-            case SpellTier.Medium:
-
-                return levelConfig.mediumRange;
-
-
-            case SpellTier.Advanced:
-
-                return levelConfig.advancedRange;
-
-
-            case SpellTier.Defense:
-
-                return levelConfig.defenseRange;
-
-
-            default:
-
-                return null;
-        }
-    }
-
-
-    //==================================================
-    // RANDOM
-    //==================================================
-
-    private int GetRandomValue(
-        int minimum,
-        int maximum
-    )
-    {
-        if (minimum > maximum)
-        {
-            int temporary =
-                minimum;
-
-            minimum =
-                maximum;
-
-            maximum =
-                temporary;
-        }
-
-
-        return Random.Range(
-            minimum,
-            maximum + 1
-        );
-    }
-
-
-    //==================================================
-    // CLEAR CURRENT QUESTION
+    // CLEAR QUESTION
     //==================================================
 
     public void ClearCurrentQuestion()
     {
-        currentOperandA = 0;
-        currentOperandB = 0;
-        currentCorrectAnswer = 0;
-
-        hasCurrentQuestion = false;
-    }
+        currentQuestion =
+            null;
 
 
-    //==================================================
-    // OPERATOR
-    //==================================================
-
-    private string GetOperatorSymbol(
-        MathOperation operation
-    )
-    {
-        switch (operation)
+        if (
+            questionDisplayController !=
+            null
+        )
         {
-            case MathOperation.Addition:
-                return "+";
-
-            case MathOperation.Subtraction:
-                return "-";
-
-            case MathOperation.Multiplication:
-                return "×";
-
-            case MathOperation.Division:
-                return "÷";
-
-            default:
-                return "";
+            questionDisplayController
+                .HideAll();
         }
     }
 
 
     //==================================================
-    // DEBUG SESSION
+    // DEBUG
     //==================================================
 
-    [ContextMenu("DEBUG - Session Info")]
-    private void DebugSessionInfo()
+    private string FormatDebugQuestion(
+        QuestionData question
+    )
     {
-        Debug.Log(
-            "QUESTION SESSION\n" +
-            $"Basic: " +
-            $"{questionSession.GetRecordedCount(SpellTier.Basic)}\n" +
-            $"Medium: " +
-            $"{questionSession.GetRecordedCount(SpellTier.Medium)}\n" +
-            $"Advanced: " +
-            $"{questionSession.GetRecordedCount(SpellTier.Advanced)}\n" +
-            $"Defense: " +
-            $"{questionSession.GetRecordedCount(SpellTier.Defense)}"
-        );
+        string operationSymbol =
+            "?";
+
+
+        switch (question.operation)
+        {
+            case MathOperation.Addition:
+
+                operationSymbol = "+";
+
+                break;
+
+
+            case MathOperation.Subtraction:
+
+                operationSymbol = "-";
+
+                break;
+
+
+            case MathOperation.Multiplication:
+
+                operationSymbol = "×";
+
+                break;
+
+
+            case MathOperation.Division:
+
+                operationSymbol = "÷";
+
+                break;
+        }
+
+
+        return
+            question.operandA +
+            " " +
+            operationSymbol +
+            " " +
+            question.operandB +
+            " = " +
+            question.correctAnswer +
+            " | Spell = " +
+            question.spellTier +
+            " | Defense Difficulty = " +
+            question.defenseDifficulty;
     }
 }

@@ -8,7 +8,13 @@ public class BattleManager : MonoBehaviour
     // LEVEL CONFIG
     //==================================================
 
-    [Header("Level Config")]
+    [Header("Stage Config")]
+
+    [SerializeField]
+    private BattleStageConfig stageConfig;
+
+
+    [Header("Editor Fallback Level")]
 
     [SerializeField]
     private BattleLevelConfig levelConfig;
@@ -26,6 +32,10 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private EnemyBattle enemyBattle;
 
+    [SerializeField]
+    private EnemyVisualController
+        enemyVisualController;
+
 
     //==================================================
     // SYSTEM REFERENCES
@@ -42,8 +52,11 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private QuestionManager questionManager;
 
+    [Header("Question Input")]
+
     [SerializeField]
-    private NumpadInputManager numpadInput;
+    private AnswerSlotInputManager
+        answerSlotInputManager;
 
     [Header("Battle Result")]
 
@@ -60,6 +73,12 @@ public class BattleManager : MonoBehaviour
     [SerializeField]
     private BattleAudioController battleAudio;
 
+    [Header("Turn Presentation")]
+
+    [SerializeField]
+    private TurnPresentationController
+        turnPresentation;
+
 
     //==================================================
     // TIMING
@@ -69,6 +88,21 @@ public class BattleManager : MonoBehaviour
 
     [SerializeField]
     private float feedbackDuration = 1.2f;
+
+    [Header("Turn Timing")]
+
+    [SerializeField]
+    private float enemyWarningDelay = 0.5f;
+
+    //==================================================
+    // ADAPTIVE DEFENSE
+    //==================================================
+
+    [Header("Adaptive Defense")]
+
+    [SerializeField]
+    private AdaptiveDefenseManager
+        adaptiveDefenseManager;
 
 
     //==================================================
@@ -106,7 +140,90 @@ public class BattleManager : MonoBehaviour
 
     private void Start()
     {
+        if (!ResolveLevelConfig())
+        {
+            enabled = false;
+
+            return;
+        }
+
+
         InitializeBattle();
+    }
+
+    //==================================================
+    // RESOLVE LEVEL CONFIG
+    //==================================================
+
+    private bool ResolveLevelConfig()
+    {
+        //==============================================
+        // STAGE CONFIG AVAILABLE
+        //==============================================
+
+        if (stageConfig != null)
+        {
+            int selectedLevel =
+                BattleSelectionData
+                    .SelectedLevel;
+
+
+            BattleLevelConfig selectedConfig =
+                stageConfig.GetLevelConfig(
+                    selectedLevel
+                );
+
+
+            if (selectedConfig != null)
+            {
+                levelConfig =
+                    selectedConfig;
+
+
+                Debug.Log(
+                    "BattleManager: " +
+                    "Memuat Level " +
+                    selectedLevel +
+                    " | Enemy = " +
+                    levelConfig.enemyName
+                );
+
+
+                return true;
+            }
+
+
+            Debug.LogWarning(
+                "BattleManager: " +
+                "Config level terpilih tidak ditemukan. " +
+                "Mencoba Editor Fallback."
+            );
+        }
+
+
+        //==============================================
+        // EDITOR FALLBACK
+        //==============================================
+
+        if (levelConfig != null)
+        {
+            Debug.LogWarning(
+                "BattleManager: " +
+                "Menggunakan Editor Fallback Level Config."
+            );
+
+
+            return true;
+        }
+
+
+        Debug.LogError(
+            "BattleManager: " +
+            "Tidak ada Level Config yang dapat digunakan."
+        );
+
+
+        return false;
     }
 
 
@@ -141,6 +258,13 @@ public class BattleManager : MonoBehaviour
             levelConfig.enemyMaxLives
         );
 
+        if (enemyVisualController != null)
+        {
+            enemyVisualController.Initialize(
+                levelConfig
+            );
+        }
+
 
         //==============================================
         // QUESTION SYSTEM
@@ -149,6 +273,20 @@ public class BattleManager : MonoBehaviour
         questionManager.Initialize(
             levelConfig
         );
+
+        if (adaptiveDefenseManager != null)
+        {
+            adaptiveDefenseManager
+                .ResetAdaptation();
+        }
+
+        if (battleResultUI != null)
+        {
+            battleResultUI.InitializeRuntime(
+                levelConfig,
+                stageConfig
+            );
+        }
 
 
         //==============================================
@@ -164,7 +302,11 @@ public class BattleManager : MonoBehaviour
         // INPUT
         //==============================================
 
-        numpadInput.ResetInput();
+        if (answerSlotInputManager != null)
+        {
+            answerSlotInputManager
+                .ResetInput();
+        }
 
         spellController.ResetSelection();
 
@@ -201,22 +343,72 @@ public class BattleManager : MonoBehaviour
             return;
 
 
+        StartCoroutine(
+            PlayerTurnSequence()
+        );
+    }
+
+    private IEnumerator PlayerTurnSequence()
+    {
+        //==================================================
+        // STATE
+        //==================================================
+
         currentTurn =
             BattleTurn.Player;
 
 
         questionActive = false;
-        isResolving = false;
 
+        // Disable input selama intro turn.
+        isResolving = true;
+
+
+        //==================================================
+        // RESET
+        //==================================================
 
         questionManager.ClearCurrentQuestion();
 
-        numpadInput.ResetInput();
+        if (answerSlotInputManager != null)
+        {
+            answerSlotInputManager
+                .ResetInput();
+        }
 
         spellController.ResetSelection();
 
 
-        battleUI.ShowPlayerTurn();
+        turnPresentation.StopWarning();
+
+
+        //==================================================
+        // PREPARE UI
+        //==================================================
+
+        battleUI.PrepareTurnTransition(
+            BattleTurn.Player
+        );
+
+
+        //==================================================
+        // TURN INTRO
+        //==================================================
+
+        yield return turnPresentation
+            .PlayTurnIntro(
+                BattleTurn.Player
+            );
+
+
+        //==================================================
+        // PLAYER ACTION
+        //==================================================
+
+        battleUI.ShowPlayerActionPanel();
+
+
+        isResolving = false;
 
 
         Debug.Log(
@@ -264,7 +456,11 @@ public class BattleManager : MonoBehaviour
         // RESET INPUT
         //==============================================
 
-        numpadInput.ResetInput();
+        if (answerSlotInputManager != null)
+        {
+            answerSlotInputManager
+                .ResetInput();
+        }
 
 
         //==============================================
@@ -281,18 +477,20 @@ public class BattleManager : MonoBehaviour
         // GENERATE QUESTION
         //==============================================
 
-        bool success =
+        QuestionData question =
             questionManager.GenerateQuestion(
                 spellTier
             );
 
 
-        if (!success)
+        if (question == null)
         {
             Debug.LogError(
                 "BattleManager: " +
                 "Gagal membuat soal Player."
             );
+
+            questionActive = false;
 
             battleUI.ShowPlayerTurn();
 
@@ -320,22 +518,80 @@ public class BattleManager : MonoBehaviour
             return;
 
 
+        StartCoroutine(
+            EnemyTurnSequence()
+        );
+    }
+
+    private IEnumerator EnemyTurnSequence()
+    {
+        //==================================================
+        // STATE
+        //==================================================
+
         currentTurn =
             BattleTurn.Enemy;
 
 
         questionActive = false;
-        isResolving = false;
 
+        isResolving = true;
+
+
+        //==================================================
+        // RESET
+        //==================================================
 
         questionManager.ClearCurrentQuestion();
 
-        numpadInput.ResetInput();
+        if (answerSlotInputManager != null)
+        {
+            answerSlotInputManager
+                .ResetInput();
+        }
 
         spellController.ResetSelection();
 
 
-        battleUI.ShowEnemyTurn();
+        //==================================================
+        // PREPARE UI
+        //==================================================
+
+        battleUI.PrepareTurnTransition(
+            BattleTurn.Enemy
+        );
+
+
+        //==================================================
+        // TURN INTRO
+        //==================================================
+
+        yield return turnPresentation
+            .PlayTurnIntro(
+                BattleTurn.Enemy
+            );
+
+
+        //==================================================
+        // WARNING
+        //==================================================
+
+        turnPresentation.StartWarning();
+
+
+        yield return new WaitForSeconds(
+            enemyWarningDelay
+        );
+
+
+        //==================================================
+        // DEFENSE BUTTON
+        //==================================================
+
+        battleUI.ShowEnemyActionPanel();
+
+
+        isResolving = false;
 
 
         Debug.Log(
@@ -367,7 +623,11 @@ public class BattleManager : MonoBehaviour
             SpellTier.Defense;
 
 
-        numpadInput.ResetInput();
+        if (answerSlotInputManager != null)
+        {
+            answerSlotInputManager
+                .ResetInput();
+        }
 
 
         //==============================================
@@ -388,18 +648,20 @@ public class BattleManager : MonoBehaviour
         // GENERATE DEFENSE QUESTION
         //==============================================
 
-        bool success =
+        QuestionData question =
             questionManager.GenerateQuestion(
                 SpellTier.Defense
             );
 
 
-        if (!success)
+        if (question == null)
         {
             Debug.LogError(
                 "BattleManager: " +
                 "Gagal membuat soal Defense."
             );
+
+            questionActive = false;
 
             battleUI.ShowEnemyTurn();
 
@@ -434,10 +696,21 @@ public class BattleManager : MonoBehaviour
 
 
         //==============================================
-        // AMBIL JAWABAN DARI NUMPAD
+        // AMBIL JAWABAN DARI ANSWER SLOT
         //==============================================
 
-        if (!numpadInput.TryGetAnswer(
+        if (answerSlotInputManager == null)
+        {
+            Debug.LogError(
+                "BattleManager: " +
+                "AnswerSlotInputManager belum diisi."
+            );
+
+            return;
+        }
+
+
+        if (!answerSlotInputManager.TryGetAnswer(
             out int playerAnswer
         ))
         {
@@ -471,7 +744,7 @@ public class BattleManager : MonoBehaviour
         // Warning Arrow berhenti.
         if (currentTurn == BattleTurn.Enemy)
         {
-            battleUI.SetWarning(false);
+            turnPresentation.StopWarning();
         }
 
 
@@ -516,7 +789,7 @@ public class BattleManager : MonoBehaviour
             // FEEDBACK
             //==============================================
 
-            battleUI.ShowCorrectFeedback();
+            battleUI.ShowMantraSuccess();
 
             battleAudio.PlayMantraSuccess();
 
@@ -641,13 +914,24 @@ public class BattleManager : MonoBehaviour
     bool isCorrect
     )
     {
+        //==============================================
+        // ADAPTIVE DEFENSE RESULT
+        //==============================================
+        if (adaptiveDefenseManager != null)
+        {
+            adaptiveDefenseManager
+                .RegisterDefenseResult(
+                    isCorrect
+                );
+        }
+
         //==================================================
         // DEFENSE BERHASIL
         //==================================================
 
         if (isCorrect)
         {
-            battleUI.ShowCorrectFeedback();
+            battleUI.ShowMantraSuccess();
 
             battleAudio.PlayMantraSuccess();
 
@@ -761,6 +1045,8 @@ public class BattleManager : MonoBehaviour
         isResolving = false;
         questionActive = false;
 
+        turnPresentation.ResetPresentation();
+
 
         //==============================================
         // RESULT
@@ -792,6 +1078,8 @@ public class BattleManager : MonoBehaviour
         isResolving = false;
         questionActive = false;
 
+        turnPresentation.ResetPresentation();
+
 
         if (battleResultUI != null)
         {
@@ -816,6 +1104,8 @@ public class BattleManager : MonoBehaviour
     public void RetryBattle()
     {
         StopAllCoroutines();
+
+        turnPresentation.ResetPresentation();
 
         battleAnimation.ResetVisualState();
 
@@ -856,6 +1146,12 @@ public class BattleManager : MonoBehaviour
         // akan digunakan lagi.
         questionManager.RestartSessionAttempt();
 
+        if (adaptiveDefenseManager != null)
+        {
+            adaptiveDefenseManager
+                .RestartAttemptStreaks();
+        }
+
 
         //==================================================
         // RESET SPELL & INPUT
@@ -863,7 +1159,11 @@ public class BattleManager : MonoBehaviour
 
         spellController.ResetSelection();
 
-        numpadInput.ResetInput();
+        if (answerSlotInputManager != null)
+        {
+            answerSlotInputManager
+                .ResetInput();
+        }
 
 
         //==================================================
@@ -874,7 +1174,8 @@ public class BattleManager : MonoBehaviour
 
         battleUI.HideFeedback();
 
-        battleUI.SetWarning(false);
+        turnPresentation.StartWarning();
+        turnPresentation.StopWarning();
 
 
         //==================================================
@@ -926,6 +1227,16 @@ public class BattleManager : MonoBehaviour
             return false;
         }
 
+        if (enemyVisualController == null)
+        {
+            Debug.LogError(
+                "BattleManager: " +
+                "EnemyVisualController kosong."
+            );
+
+            return false;
+        }
+
 
         if (battleUI == null)
         {
@@ -957,10 +1268,11 @@ public class BattleManager : MonoBehaviour
         }
 
 
-        if (numpadInput == null)
+        if (answerSlotInputManager == null)
         {
             Debug.LogError(
-                "BattleManager: NumpadInputManager kosong."
+                "BattleManager: " +
+                "AnswerSlotInputManager kosong."
             );
 
             return false;
@@ -989,6 +1301,16 @@ public class BattleManager : MonoBehaviour
             Debug.LogError(
                 "BattleManager: " +
                 "BattleAudioController kosong."
+            );
+
+            return false;
+        }
+
+        if (turnPresentation == null)
+        {
+            Debug.LogError(
+                "BattleManager: " +
+                "TurnPresentationController kosong."
             );
 
             return false;

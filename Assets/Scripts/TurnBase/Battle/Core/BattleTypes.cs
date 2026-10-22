@@ -27,3 +27,16 @@ public enum BattleTurn
         Correct,
         Wrong
     }
+
+    public enum DefenseDifficulty
+    {
+        Easy,
+        Normal,
+        Hard
+    }
+
+    public enum AnswerInputMode
+    {
+        ColumnRightToLeft,
+        NormalNumber
+    }

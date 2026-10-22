@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68f72c1c51d9dac45a9cafae15801002, type: 3}
+  m_Name: Jumlah_StageConfig
+  m_EditorClassIdentifier: 
+  operation: 0
+  battleSceneName: TB-Jumlah
+  stageSelectionSceneName: StagePerjumlahan
+  levelConfigs:
+  - {fileID: 11400000, guid: c041603f523239e4298ef124c7a9bfeb, type: 2}
+  - {fileID: 11400000, guid: 53f47d6527289ab478e6714b9fc9ec78, type: 2}
+  - {fileID: 11400000, guid: 5c5345b8c096d844cad2ad578be0533f, type: 2}
+  - {fileID: 11400000, guid: e64b2c1b2bdd9ea488fd96e2f418de0a, type: 2}
+  - {fileID: 11400000, guid: 2e44a091e8ba2c64ea39d69a972a7147, type: 2}
+  - {fileID: 11400000, guid: ab36107cad7575f49a8e0851f5b363cc, type: 2}
+  - {fileID: 11400000, guid: eeb45ce35b0048245aae12a59a4fdb93, type: 2}
+  - {fileID: 11400000, guid: c6f66865d32b025448a82434a07ccc09, type: 2}
+  - {fileID: 11400000, guid: f4de26e8b16e0d84999c90d27913a32b, type: 2}
+  - {fileID: 11400000, guid: 5209efdf82cba3a46a72ceadc22fb8ef, type: 2}

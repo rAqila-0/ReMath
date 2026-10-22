@@ -32,6 +32,26 @@ public class EnemyBattle : MonoBehaviour
     [SerializeField]
     private Sprite emptyHeartSprite;
 
+    //==================================================
+    // HEART FEEDBACK
+    //==================================================
+
+    [Header("Heart Feedback")]
+
+    [SerializeField]
+    private RectTransform heartContainer;
+
+    [SerializeField]
+    private float heartPulseScale = 1.08f;
+
+    [SerializeField]
+    private float heartPulseDuration = 0.18f;
+
+
+    private Coroutine heartPulseCoroutine;
+
+    private Vector3 heartOriginalScale;
+
 
     //==================================================
     // PROPERTIES
@@ -51,6 +71,15 @@ public class EnemyBattle : MonoBehaviour
     private void Start()
     {
         ResetLives();
+    }
+
+    private void Awake()
+    {
+        if (heartContainer != null)
+        {
+            heartOriginalScale =
+                heartContainer.localScale;
+        }
     }
 
 
@@ -88,6 +117,8 @@ public class EnemyBattle : MonoBehaviour
 
         UpdateHeartUI();
 
+        PlayHeartPulse();
+
         Debug.Log(
             $"Enemy terkena {damage} damage. " +
             $"Nyawa tersisa: {currentLives}/{maxLives}"
@@ -109,6 +140,22 @@ public class EnemyBattle : MonoBehaviour
         currentLives = maxLives;
 
         UpdateHeartUI();
+
+        if (heartPulseCoroutine != null)
+        {
+            StopCoroutine(
+                heartPulseCoroutine
+            );
+
+            heartPulseCoroutine = null;
+        }
+
+
+        if (heartContainer != null)
+        {
+            heartContainer.localScale =
+                heartOriginalScale;
+        }
     }
 
 
@@ -154,6 +201,104 @@ public class EnemyBattle : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void PlayHeartPulse()
+    {
+        if (heartContainer == null)
+            return;
+
+
+        if (heartPulseCoroutine != null)
+        {
+            StopCoroutine(
+                heartPulseCoroutine
+            );
+        }
+
+
+        heartPulseCoroutine =
+            StartCoroutine(
+                HeartPulseRoutine()
+            );
+    }
+
+
+    private IEnumerator HeartPulseRoutine()
+    {
+        float halfDuration =
+            heartPulseDuration * 0.5f;
+
+
+        //==============================================
+        // SCALE UP
+        //==============================================
+
+        float elapsed = 0f;
+
+
+        while (elapsed < halfDuration)
+        {
+            elapsed += Time.deltaTime;
+
+
+            float progress =
+                Mathf.Clamp01(
+                    elapsed /
+                    halfDuration
+                );
+
+
+            heartContainer.localScale =
+                Vector3.Lerp(
+                    heartOriginalScale,
+                    heartOriginalScale *
+                    heartPulseScale,
+                    progress
+                );
+
+
+            yield return null;
+        }
+
+
+        //==============================================
+        // SCALE BACK
+        //==============================================
+
+        elapsed = 0f;
+
+
+        while (elapsed < halfDuration)
+        {
+            elapsed += Time.deltaTime;
+
+
+            float progress =
+                Mathf.Clamp01(
+                    elapsed /
+                    halfDuration
+                );
+
+
+            heartContainer.localScale =
+                Vector3.Lerp(
+                    heartOriginalScale *
+                    heartPulseScale,
+                    heartOriginalScale,
+                    progress
+                );
+
+
+            yield return null;
+        }
+
+
+        heartContainer.localScale =
+            heartOriginalScale;
+
+
+        heartPulseCoroutine = null;
     }
 
 

@@ -1,23 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
 public class QuestionRange
 {
     [Header("Operand A")]
-    [Min(0)]
-    public int minA = 1;
-
-    [Min(0)]
-    public int maxA = 10;
+    [Min(0)] public int minA = 1;
+    [Min(0)] public int maxA = 10;
 
     [Header("Operand B")]
-    [Min(0)]
-    public int minB = 1;
-
-    [Min(0)]
-    public int maxB = 10;
+    [Min(0)] public int minB = 1;
+    [Min(0)] public int maxB = 10;
 }
 
 
@@ -36,9 +28,23 @@ public class BattleLevelConfig : ScriptableObject
     [Min(1)]
     public int levelNumber = 1;
 
-    public MathOperation operation = MathOperation.Addition;
+    public MathOperation operation =
+        MathOperation.Addition;
 
-    public string enemyName = "Slime Level 1";
+    [Tooltip("Apakah level ini sudah dapat dimainkan?")]
+    public bool isPlayable = true;
+
+
+    //==================================================
+    // ENEMY
+    //==================================================
+
+    [Header("Enemy")]
+
+    public string enemyName =
+        "Slime Merah";
+
+    public Sprite enemySprite;
 
 
     //==================================================
@@ -55,37 +61,38 @@ public class BattleLevelConfig : ScriptableObject
 
 
     //==================================================
-    // BASIC SPELL
+    // ATTACK QUESTION RANGE
     //==================================================
 
-    [Header("Basic Spell Question")]
-
+    [Header("Basic Attack - 2 Digits")]
     public QuestionRange basicRange;
 
 
-    //==================================================
-    // MEDIUM SPELL
-    //==================================================
-
-    [Header("Medium Spell Question")]
-
+    [Header("Medium Attack - 3 Digits")]
     public QuestionRange mediumRange;
 
 
-    //==================================================
-    // ADVANCED SPELL
-    //==================================================
-
-    [Header("Advanced Spell Question")]
-
+    [Header("Advanced Attack - 4 Digits")]
     public QuestionRange advancedRange;
 
 
     //==================================================
-    // DEFENSE
+    // MULTIPLICATION / DIVISION PROGRESSION
     //==================================================
 
-    [Header("Defense Question")]
+    [Header("Multiplication / Division Progression")]
 
+    [Range(1, 10)]
+    public int maxFactMultiplier = 10;
+
+
+    //==================================================
+    // LEGACY DEFENSE RANGE
+    //
+    // Defense sekarang menggunakan Adaptive Defense.
+    // Field ini sementara belum dihapus supaya asset lama aman.
+    //==================================================
+
+    [Header("Legacy - Defense Range (Unused)")]
     public QuestionRange defenseRange;
 }

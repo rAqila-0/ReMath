@@ -117,6 +117,10 @@ public class SpellController : MonoBehaviour
 
             if (battleUI != null)
             {
+                battleUI.SetSelectedSpellVisual(
+                    spellTier
+                );
+
                 battleUI.ShowSpellPreview(
                     spellTier,
                     damage
@@ -253,6 +257,8 @@ public class SpellController : MonoBehaviour
         if (battleUI != null)
         {
             battleUI.HideSpellPreview();
+
+            battleUI.ClearSelectedSpellVisual();
         }
     }
 }

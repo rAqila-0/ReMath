@@ -1,5 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
+//using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -111,10 +111,33 @@ public class BattleUIManager : MonoBehaviour
     [Header("Feedback")]
 
     [SerializeField]
-    private GameObject correctFeedback;
+    private GameObject mantraSuccess;
 
     [SerializeField]
     private GameObject mantraFailed;
+
+    [SerializeField]
+    private RectTransform mantraSuccessRect;
+
+    [SerializeField]
+    private CanvasGroup mantraSuccessCanvasGroup;
+
+    [SerializeField]
+    private RectTransform mantraFailedRect;
+
+    [SerializeField]
+    private CanvasGroup mantraFailedCanvasGroup;
+
+
+    [Header("Feedback Animation")]
+
+    [SerializeField]
+    private float feedbackPopDuration = 0.18f;
+
+    [SerializeField]
+    private float feedbackStartScale = 0.75f;
+
+    private Coroutine feedbackAnimationCoroutine;
 
 
     //==================================================
@@ -138,6 +161,21 @@ public class BattleUIManager : MonoBehaviour
 
     [SerializeField]
     private string playerName = "Oren";
+
+    //==================================================
+    // SPELL SELECTION VISUAL
+    //==================================================
+
+    [Header("Spell Selection Visual")]
+
+    [SerializeField]
+    private GameObject basicSelectedFrame;
+
+    [SerializeField]
+    private GameObject mediumSelectedFrame;
+
+    [SerializeField]
+    private GameObject advancedSelectedFrame;
 
 
     //==================================================
@@ -296,7 +334,7 @@ public class BattleUIManager : MonoBehaviour
         if (previewDamageText != null)
         {
             previewDamageText.text =
-                "Damage: " + damage;
+                "Damage: x" + damage;
         }
 
         if (previewConfirmText != null)
@@ -365,7 +403,7 @@ public class BattleUIManager : MonoBehaviour
             else
             {
                 questionInfoText.text =
-                    "Damage: " + damage;
+                    "Damage: x" + damage;
             }
         }
 
@@ -416,7 +454,15 @@ public class BattleUIManager : MonoBehaviour
 
     public void SetAnswerText(string text)
     {
-        if (answerText != null)
+        if (answerText == null)
+            return;
+
+
+        if (string.IsNullOrEmpty(text))
+        {
+            answerText.text = "?";
+        }
+        else
         {
             answerText.text = text;
         }
@@ -484,14 +530,32 @@ public class BattleUIManager : MonoBehaviour
     // FEEDBACK
     //==================================================
 
-    public void ShowCorrectFeedback()
+    public void ShowMantraSuccess()
     {
         HideFeedback();
 
-        if (correctFeedback != null)
+
+        if (mantraSuccess != null)
         {
-            correctFeedback.SetActive(true);
+            mantraSuccess.SetActive(true);
         }
+
+
+        if (feedbackAnimationCoroutine != null)
+        {
+            StopCoroutine(
+                feedbackAnimationCoroutine
+            );
+        }
+
+
+        feedbackAnimationCoroutine =
+            StartCoroutine(
+                AnimateFeedback(
+                    mantraSuccessRect,
+                    mantraSuccessCanvasGroup
+                )
+            );
     }
 
 
@@ -499,23 +563,169 @@ public class BattleUIManager : MonoBehaviour
     {
         HideFeedback();
 
+
         if (mantraFailed != null)
         {
             mantraFailed.SetActive(true);
         }
+
+
+        if (feedbackAnimationCoroutine != null)
+        {
+            StopCoroutine(
+                feedbackAnimationCoroutine
+            );
+        }
+
+
+        feedbackAnimationCoroutine =
+            StartCoroutine(
+                AnimateFeedback(
+                    mantraFailedRect,
+                    mantraFailedCanvasGroup
+                )
+            );
+    }
+
+    //==================================================
+    // FEEDBACK ANIMATION
+    //==================================================
+
+    private IEnumerator AnimateFeedback(
+        RectTransform targetRect,
+        CanvasGroup targetCanvasGroup
+    )
+    {
+        if (targetRect == null)
+            yield break;
+
+
+        Vector3 finalScale =
+            Vector3.one;
+
+
+        targetRect.localScale =
+            finalScale *
+            feedbackStartScale;
+
+
+        if (targetCanvasGroup != null)
+        {
+            targetCanvasGroup.alpha = 0f;
+        }
+
+
+        float elapsed = 0f;
+
+
+        while (
+            elapsed <
+            feedbackPopDuration
+        )
+        {
+            elapsed +=
+                Time.deltaTime;
+
+
+            float progress =
+                Mathf.Clamp01(
+                    elapsed /
+                    feedbackPopDuration
+                );
+
+
+            // Sedikit smooth.
+            progress =
+                Mathf.SmoothStep(
+                    0f,
+                    1f,
+                    progress
+                );
+
+
+            targetRect.localScale =
+                Vector3.Lerp(
+                    finalScale *
+                    feedbackStartScale,
+                    finalScale,
+                    progress
+                );
+
+
+            if (targetCanvasGroup != null)
+            {
+                targetCanvasGroup.alpha =
+                    progress;
+            }
+
+
+            yield return null;
+        }
+
+
+        targetRect.localScale =
+            finalScale;
+
+
+        if (targetCanvasGroup != null)
+        {
+            targetCanvasGroup.alpha = 1f;
+        }
+
+
+        feedbackAnimationCoroutine = null;
     }
 
 
     public void HideFeedback()
     {
-        if (correctFeedback != null)
+        if (feedbackAnimationCoroutine != null)
         {
-            correctFeedback.SetActive(false);
+            StopCoroutine(
+                feedbackAnimationCoroutine
+            );
+
+            feedbackAnimationCoroutine = null;
         }
+
+
+        if (mantraSuccess != null)
+        {
+            mantraSuccess.SetActive(false);
+        }
+
 
         if (mantraFailed != null)
         {
             mantraFailed.SetActive(false);
+        }
+
+
+        if (mantraSuccessRect != null)
+        {
+            mantraSuccessRect.localScale =
+                Vector3.one;
+        }
+
+
+        if (mantraFailedRect != null)
+        {
+            mantraFailedRect.localScale =
+                Vector3.one;
+        }
+
+
+        if (mantraSuccessCanvasGroup != null)
+        {
+            mantraSuccessCanvasGroup.alpha =
+                1f;
+        }
+
+
+        if (mantraFailedCanvasGroup != null)
+        {
+            mantraFailedCanvasGroup.alpha =
+                1f;
         }
     }
 
@@ -668,6 +878,92 @@ public class BattleUIManager : MonoBehaviour
         }
     }
 
+    //==================================================
+    // PREPARE TURN TRANSITION
+    //==================================================
+
+    public void PrepareTurnTransition(
+        BattleTurn turn
+    )
+    {
+        SetTurnText(turn);
+
+
+        if (spellPanel != null)
+        {
+            spellPanel.SetActive(false);
+        }
+
+
+        if (defensePanel != null)
+        {
+            defensePanel.SetActive(false);
+        }
+
+
+        if (questionPanel != null)
+        {
+            questionPanel.SetActive(false);
+        }
+
+
+        HideSpellPreview();
+
+        HideFeedback();
+
+        ClearQuestion();
+    }
+
+
+    //==================================================
+    // SHOW PLAYER ACTION
+    //==================================================
+
+    public void ShowPlayerActionPanel()
+    {
+        if (spellPanel != null)
+        {
+            spellPanel.SetActive(true);
+        }
+
+
+        if (defensePanel != null)
+        {
+            defensePanel.SetActive(false);
+        }
+
+
+        if (questionPanel != null)
+        {
+            questionPanel.SetActive(false);
+        }
+    }
+
+
+    //==================================================
+    // SHOW ENEMY ACTION
+    //==================================================
+
+    public void ShowEnemyActionPanel()
+    {
+        if (spellPanel != null)
+        {
+            spellPanel.SetActive(false);
+        }
+
+
+        if (defensePanel != null)
+        {
+            defensePanel.SetActive(true);
+        }
+
+
+        if (questionPanel != null)
+        {
+            questionPanel.SetActive(false);
+        }
+    }
+
 
     //==================================================
     // TEST
@@ -782,5 +1078,56 @@ public class BattleUIManager : MonoBehaviour
     private void TestDefeat()
     {
         ShowDefeat();
+    }
+
+    //==================================================
+    // SPELL SELECTION VISUAL
+    //==================================================
+
+    public void SetSelectedSpellVisual(
+        SpellTier spellTier
+    )
+    {
+        ClearSelectedSpellVisual();
+
+
+        switch (spellTier)
+        {
+            case SpellTier.Basic:
+
+                if (basicSelectedFrame != null)
+                    basicSelectedFrame.SetActive(true);
+
+                break;
+
+
+            case SpellTier.Medium:
+
+                if (mediumSelectedFrame != null)
+                    mediumSelectedFrame.SetActive(true);
+
+                break;
+
+
+            case SpellTier.Advanced:
+
+                if (advancedSelectedFrame != null)
+                    advancedSelectedFrame.SetActive(true);
+
+                break;
+        }
+    }
+
+
+    public void ClearSelectedSpellVisual()
+    {
+        if (basicSelectedFrame != null)
+            basicSelectedFrame.SetActive(false);
+
+        if (mediumSelectedFrame != null)
+            mediumSelectedFrame.SetActive(false);
+
+        if (advancedSelectedFrame != null)
+            advancedSelectedFrame.SetActive(false);
     }
 }

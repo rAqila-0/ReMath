@@ -1,67 +1,12 @@
-using System.Collections;
 using System.Collections.Generic;
-
-
-//==================================================
-// DATA SATU SOAL
-//==================================================
-
-[System.Serializable]
-public class BattleQuestion
-{
-    public int operandA;
-    public int operandB;
-    public int correctAnswer;
-
-    public MathOperation operation;
-    public SpellTier spellTier;
-
-
-    public BattleQuestion(
-        int operandA,
-        int operandB,
-        int correctAnswer,
-        MathOperation operation,
-        SpellTier spellTier
-    )
-    {
-        this.operandA = operandA;
-        this.operandB = operandB;
-        this.correctAnswer = correctAnswer;
-        this.operation = operation;
-        this.spellTier = spellTier;
-    }
-}
-
-
-//==================================================
-// QUESTION SESSION
-//==================================================
 
 public class QuestionSession
 {
-    // Riwayat soal berdasarkan jenis spell.
-    private readonly Dictionary
-        <SpellTier, List<BattleQuestion>>
-        questionHistory =
-        new Dictionary
-        <SpellTier, List<BattleQuestion>>();
-
-
-    // Posisi soal yang sedang digunakan
-    // untuk setiap jenis spell.
-    private readonly Dictionary
-        <SpellTier, int>
-        currentIndexes =
-        new Dictionary
-        <SpellTier, int>();
-
-
     //==================================================
-    // SPELL TIERS
+    // SUPPORTED SPELL TIERS
     //==================================================
 
-    private readonly SpellTier[] spellTiers =
+    private static readonly SpellTier[] SupportedTiers =
     {
         SpellTier.Basic,
         SpellTier.Medium,
@@ -71,116 +16,228 @@ public class QuestionSession
 
 
     //==================================================
+    // QUESTION HISTORY
+    //==================================================
+
+    private readonly Dictionary<
+        SpellTier,
+        List<QuestionData>
+    > questionHistory =
+        new Dictionary<
+            SpellTier,
+            List<QuestionData>
+        >();
+
+
+    //==================================================
+    // CURRENT INDEX
+    //==================================================
+
+    private readonly Dictionary<
+        SpellTier,
+        int
+    > currentIndexes =
+        new Dictionary<
+            SpellTier,
+            int
+        >();
+
+
+    //==================================================
     // CONSTRUCTOR
     //==================================================
 
     public QuestionSession()
     {
-        StartNewSession();
+        foreach (
+            SpellTier tier
+            in SupportedTiers
+        )
+        {
+            InitializeTier(
+                tier
+            );
+        }
     }
 
 
     //==================================================
-    // NEW SESSION
+    // INITIALIZE TIER
+    //==================================================
+
+    private void InitializeTier(
+        SpellTier spellTier
+    )
+    {
+        if (
+            !questionHistory.ContainsKey(
+                spellTier
+            )
+        )
+        {
+            questionHistory[
+                spellTier
+            ] =
+                new List<QuestionData>();
+        }
+
+
+        if (
+            !currentIndexes.ContainsKey(
+                spellTier
+            )
+        )
+        {
+            currentIndexes[
+                spellTier
+            ] = 0;
+        }
+    }
+
+
+    //==================================================
+    // START NEW SESSION
     //==================================================
 
     public void StartNewSession()
     {
-        questionHistory.Clear();
-        currentIndexes.Clear();
-
-
-        foreach (SpellTier tier in spellTiers)
+        foreach (
+            SpellTier tier
+            in SupportedTiers
+        )
         {
-            questionHistory.Add(
-                tier,
-                new List<BattleQuestion>()
+            InitializeTier(
+                tier
             );
 
-            currentIndexes.Add(
-                tier,
-                0
-            );
+
+            questionHistory[
+                tier
+            ].Clear();
+
+
+            currentIndexes[
+                tier
+            ] = 0;
         }
     }
 
 
     //==================================================
-    // RETRY ATTEMPT
+    // RESTART ATTEMPT
     //==================================================
 
     public void RestartAttempt()
     {
-        foreach (SpellTier tier in spellTiers)
+        foreach (
+            SpellTier tier
+            in SupportedTiers
+        )
         {
-            currentIndexes[tier] = 0;
+            InitializeTier(
+                tier
+            );
+
+
+            // History TIDAK dihapus.
+            //
+            // Kita hanya mengembalikan
+            // index ke soal pertama.
+            currentIndexes[
+                tier
+            ] = 0;
         }
     }
 
 
     //==================================================
-    // AMBIL SOAL LAMA
+    // GET RECORDED QUESTION
     //==================================================
 
     public bool TryGetRecordedQuestion(
         SpellTier spellTier,
-        out BattleQuestion question
+        out QuestionData question
     )
     {
-        EnsureTierExists(spellTier);
+        question = null;
+
+
+        InitializeTier(
+            spellTier
+        );
 
 
         int index =
-            currentIndexes[spellTier];
+            currentIndexes[
+                spellTier
+            ];
 
-        List<BattleQuestion> questions =
-            questionHistory[spellTier];
+
+        List<QuestionData> history =
+            questionHistory[
+                spellTier
+            ];
 
 
-        // Masih ada soal dari percobaan sebelumnya.
-        if (index < questions.Count)
+        if (
+            index < 0 ||
+            index >= history.Count
+        )
         {
-            question =
-                questions[index];
-
-            currentIndexes[spellTier]++;
-
-            return true;
+            return false;
         }
 
 
-        question = null;
+        question =
+            history[
+                index
+            ];
 
-        return false;
+
+        currentIndexes[
+            spellTier
+        ] =
+            index + 1;
+
+
+        return true;
     }
 
 
     //==================================================
-    // SIMPAN SOAL BARU
+    // RECORD NEW QUESTION
     //==================================================
 
     public void RecordNewQuestion(
-        BattleQuestion question
+        QuestionData question
     )
     {
         if (question == null)
             return;
 
 
-        EnsureTierExists(
-            question.spellTier
+        SpellTier tier =
+            question.spellTier;
+
+
+        InitializeTier(
+            tier
         );
 
 
         questionHistory[
-            question.spellTier
-        ].Add(question);
+            tier
+        ].Add(
+            question
+        );
 
 
-        // Soal baru langsung dianggap sudah digunakan.
         currentIndexes[
-            question.spellTier
-        ]++;
+            tier
+        ] =
+            questionHistory[
+                tier
+            ].Count;
     }
 
 
@@ -192,36 +249,13 @@ public class QuestionSession
         SpellTier spellTier
     )
     {
-        EnsureTierExists(spellTier);
+        InitializeTier(
+            spellTier
+        );
+
 
         return questionHistory[
             spellTier
         ].Count;
-    }
-
-
-    //==================================================
-    // SAFETY
-    //==================================================
-
-    private void EnsureTierExists(
-        SpellTier spellTier
-    )
-    {
-        if (!questionHistory.ContainsKey(spellTier))
-        {
-            questionHistory.Add(
-                spellTier,
-                new List<BattleQuestion>()
-            );
-        }
-
-        if (!currentIndexes.ContainsKey(spellTier))
-        {
-            currentIndexes.Add(
-                spellTier,
-                0
-            );
-        }
     }
 }

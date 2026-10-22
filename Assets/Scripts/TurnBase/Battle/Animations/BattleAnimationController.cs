@@ -96,6 +96,21 @@ public class BattleAnimationController : MonoBehaviour
     [SerializeField]
     private float resultAnimationDuration = 0.8f;
 
+    //==================================================
+    // ORIGINAL CHARACTER TRANSFORM
+    //==================================================
+
+    private Vector3 playerOriginalLocalPosition;
+    private Quaternion playerOriginalLocalRotation;
+    private Vector3 playerOriginalLocalScale;
+
+    private Vector3 enemyOriginalLocalPosition;
+    private Quaternion enemyOriginalLocalRotation;
+    private Vector3 enemyOriginalLocalScale;
+
+    private Transform playerVisualTransform;
+    private Transform enemyVisualTransform;
+
 
     //==================================================
     // AWAKE
@@ -103,6 +118,46 @@ public class BattleAnimationController : MonoBehaviour
 
     private void Awake()
     {
+        //==============================================
+        // SIMPAN TRANSFORM AWAL PLAYER
+        //==============================================
+
+        if (playerAnimator != null)
+        {
+            playerVisualTransform =
+                playerAnimator.transform;
+
+            playerOriginalLocalPosition =
+                playerVisualTransform.localPosition;
+
+            playerOriginalLocalRotation =
+                playerVisualTransform.localRotation;
+
+            playerOriginalLocalScale =
+                playerVisualTransform.localScale;
+        }
+
+
+        //==============================================
+        // SIMPAN TRANSFORM AWAL ENEMY
+        //==============================================
+
+        if (enemyAnimator != null)
+        {
+            enemyVisualTransform =
+                enemyAnimator.transform;
+
+            enemyOriginalLocalPosition =
+                enemyVisualTransform.localPosition;
+
+            enemyOriginalLocalRotation =
+                enemyVisualTransform.localRotation;
+
+            enemyOriginalLocalScale =
+                enemyVisualTransform.localScale;
+        }
+
+
         ResetVisualState();
     }
 
@@ -513,12 +568,86 @@ public class BattleAnimationController : MonoBehaviour
 
     public void ResetVisualState()
     {
+        //==================================================
+        // RESET EFFECT
+        //==================================================
+
         DisableAllProjectiles();
 
 
         if (shieldEffect != null)
         {
             shieldEffect.SetActive(false);
+        }
+
+
+        //==================================================
+        // RESET PLAYER ANIMATOR
+        //==================================================
+
+        if (playerAnimator != null)
+        {
+            playerAnimator.Rebind();
+
+            playerAnimator.Update(0f);
+
+            playerAnimator.Play(
+                "Idle",
+                0,
+                0f
+            );
+        }
+
+
+        //==================================================
+        // RESET PLAYER TRANSFORM
+        //==================================================
+
+        if (playerVisualTransform != null)
+        {
+            playerVisualTransform.localPosition =
+                playerOriginalLocalPosition;
+
+            playerVisualTransform.localRotation =
+                playerOriginalLocalRotation;
+
+            playerVisualTransform.localScale =
+                playerOriginalLocalScale;
+        }
+
+
+        //==================================================
+        // RESET ENEMY ANIMATOR
+        //==================================================
+
+        if (enemyAnimator != null)
+        {
+            enemyAnimator.Rebind();
+
+            enemyAnimator.Update(0f);
+
+            enemyAnimator.Play(
+                "Idle",
+                0,
+                0f
+            );
+        }
+
+
+        //==================================================
+        // RESET ENEMY TRANSFORM
+        //==================================================
+
+        if (enemyVisualTransform != null)
+        {
+            enemyVisualTransform.localPosition =
+                enemyOriginalLocalPosition;
+
+            enemyVisualTransform.localRotation =
+                enemyOriginalLocalRotation;
+
+            enemyVisualTransform.localScale =
+                enemyOriginalLocalScale;
         }
     }
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NumpadInputManager : MonoBehaviour
 {
@@ -23,6 +24,20 @@ public class NumpadInputManager : MonoBehaviour
     [SerializeField]
     [Min(1)]
     private int maxDigits = 5;
+
+    //==================================================
+    // CAST BUTTON
+    //==================================================
+
+    [Header("Cast Button")]
+
+    [SerializeField]
+    private Button castButton;
+
+    private void Start()
+    {
+        ResetInput();
+    }
 
 
     //==================================================
@@ -170,6 +185,9 @@ public class NumpadInputManager : MonoBehaviour
                 currentInput
             );
         }
+
+
+        UpdateCastButtonState();
     }
 
 
@@ -199,5 +217,21 @@ public class NumpadInputManager : MonoBehaviour
     private void TestBackspace()
     {
         Backspace();
+    }
+
+    //==================================================
+    // UPDATE CAST BUTTON
+    //==================================================
+
+    private void UpdateCastButtonState()
+    {
+        if (castButton == null)
+            return;
+
+
+        castButton.interactable =
+            !string.IsNullOrEmpty(
+                currentInput
+            );
     }
 }
