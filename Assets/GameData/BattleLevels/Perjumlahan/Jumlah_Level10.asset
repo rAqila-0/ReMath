@@ -17,6 +17,7 @@ MonoBehaviour:
   isPlayable: 1
   enemyName: Boss Perjumlahan
   enemySprite: {fileID: 21300000, guid: 43d6e34f5c442ac48a46162d0fe1da8f, type: 3}
+  isBoss: 1
   playerMaxLives: 5
   enemyMaxLives: 5
   basicRange:

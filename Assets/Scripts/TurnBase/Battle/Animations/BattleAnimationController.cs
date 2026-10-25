@@ -81,6 +81,26 @@ public class BattleAnimationController : MonoBehaviour
     [SerializeField]
     private float playerHitDuration = 0.4f;
 
+    [Header("Boss Projectile")]
+
+    [Tooltip("Objek proyektil boss di scene. Nonaktifkan secara default.")]
+    [SerializeField]
+    private GameObject bossProjectile;
+
+    [Tooltip("Posisi keluarnya proyektil dari boss.")]
+    [SerializeField]
+    private Transform bossProjectileSpawnPoint;
+
+    [Tooltip("Titik tujuan proyektil di dekat pemain.")]
+    [SerializeField]
+    private Transform playerProjectileTargetPoint;
+
+    [SerializeField]
+    private float bossProjectileWindUpDuration = 0.35f;
+
+    [SerializeField]
+    private float bossProjectileTravelDuration = 0.45f;
+
 
     [Header("Defense Timing")]
 
@@ -357,17 +377,103 @@ public class BattleAnimationController : MonoBehaviour
     // ENEMY ATTACK UNTIL IMPACT
     //==================================================
 
-    public IEnumerator PlayEnemyAttackUntilImpact()
+    public IEnumerator PlayEnemyAttackUntilImpact(
+        bool useBossProjectile = false
+    )
     {
+        if (useBossProjectile)
+        {
+            yield return PlayBossProjectileUntilImpact();
+            yield break;
+        }
+
         SetTriggerIfExists(
             enemyAnimator,
             "Attack"
         );
 
-
         yield return new WaitForSeconds(
             enemyAttackImpactDelay
         );
+    }
+
+
+    //==================================================
+    // BOSS PROJECTILE UNTIL IMPACT
+    //==================================================
+
+    private IEnumerator PlayBossProjectileUntilImpact()
+    {
+        SetTriggerIfExists(
+            enemyAnimator,
+            "AttackProjectile"
+        );
+
+        // Jika referensi proyektil belum dipasang, pertarungan tetap
+        // berjalan dengan jeda serangan agar tidak menyebabkan soft-lock.
+        if (
+            bossProjectile == null ||
+            bossProjectileSpawnPoint == null ||
+            playerProjectileTargetPoint == null
+        )
+        {
+            Debug.LogWarning(
+                "Boss Projectile belum lengkap. " +
+                "Isi Boss Projectile, Boss Projectile Spawn Point, " +
+                "dan Player Projectile Target Point di Inspector.",
+                this
+            );
+
+            yield return new WaitForSeconds(
+                enemyAttackImpactDelay
+            );
+
+            yield break;
+        }
+
+        yield return new WaitForSeconds(
+            bossProjectileWindUpDuration
+        );
+
+        bossProjectile.SetActive(false);
+
+        Vector3 startPosition =
+            bossProjectileSpawnPoint.position;
+
+        Vector3 targetPosition =
+            playerProjectileTargetPoint.position;
+
+        bossProjectile.transform.position =
+            startPosition;
+
+        bossProjectile.SetActive(true);
+
+        float duration =
+            Mathf.Max(0.01f, bossProjectileTravelDuration);
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+
+            float progress =
+                Mathf.Clamp01(elapsedTime / duration);
+
+            bossProjectile.transform.position =
+                Vector3.Lerp(
+                    startPosition,
+                    targetPosition,
+                    progress
+                );
+
+            yield return null;
+        }
+
+        bossProjectile.transform.position =
+            targetPosition;
+
+        bossProjectile.SetActive(false);
     }
 
 
@@ -394,7 +500,8 @@ public class BattleAnimationController : MonoBehaviour
     //==================================================
 
     public IEnumerator PlayDefenseSuccess(
-    Action onImpact = null
+        Action onImpact = null,
+        bool useBossProjectile = false
     )
     {
         //==============================================
@@ -426,15 +533,21 @@ public class BattleAnimationController : MonoBehaviour
         // ENEMY ATTACK
         //==============================================
 
-        SetTriggerIfExists(
-            enemyAnimator,
-            "Attack"
-        );
+        if (useBossProjectile)
+        {
+            yield return PlayBossProjectileUntilImpact();
+        }
+        else
+        {
+            SetTriggerIfExists(
+                enemyAnimator,
+                "Attack"
+            );
 
-
-        yield return new WaitForSeconds(
-            enemyAttackImpactDelay
-        );
+            yield return new WaitForSeconds(
+                enemyAttackImpactDelay
+            );
+        }
 
 
         //==============================================
@@ -559,6 +672,9 @@ public class BattleAnimationController : MonoBehaviour
 
         if (advancedProjectile != null)
             advancedProjectile.SetActive(false);
+
+        if (bossProjectile != null)
+            bossProjectile.SetActive(false);
     }
 
 

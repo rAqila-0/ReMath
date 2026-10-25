@@ -17,6 +17,7 @@ MonoBehaviour:
   isPlayable: 1
   enemyName: Boss Perkalian
   enemySprite: {fileID: 21300000, guid: c523ad9c006eced4da35c99a54621152, type: 3}
+  isBoss: 1
   playerMaxLives: 5
   enemyMaxLives: 5
   basicRange:

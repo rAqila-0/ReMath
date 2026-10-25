@@ -17,6 +17,7 @@ MonoBehaviour:
   isPlayable: 1
   enemyName: Boss Pengurangan
   enemySprite: {fileID: 21300000, guid: b637459d41d487a47b63b6d9f56abcb9, type: 3}
+  isBoss: 1
   playerMaxLives: 5
   enemyMaxLives: 5
   basicRange:

@@ -46,6 +46,9 @@ public class BattleLevelConfig : ScriptableObject
 
     public Sprite enemySprite;
 
+    [Tooltip("Aktifkan jika enemy pada level ini adalah boss yang menyerang dengan proyektil.")]
+    public bool isBoss = false;
+
 
     //==================================================
     // LIFE

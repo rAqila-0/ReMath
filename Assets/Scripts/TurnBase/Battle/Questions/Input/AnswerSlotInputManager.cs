@@ -7,7 +7,7 @@ public class AnswerSlotInputManager : MonoBehaviour
     // CONSTANT
     //==================================================
 
-    private const int SlotCount = 4;
+    private const int MaxSlotCount = AnswerSlotGroup.MaxSupportedSlots;
 
 
     //==================================================
@@ -49,10 +49,10 @@ public class AnswerSlotInputManager : MonoBehaviour
     //==================================================
 
     private readonly int[] digits =
-        new int[SlotCount];
+        new int[MaxSlotCount];
 
     private readonly bool[] slotFilled =
-        new bool[SlotCount];
+        new bool[MaxSlotCount];
 
 
     // 3 = satuan
@@ -60,7 +60,7 @@ public class AnswerSlotInputManager : MonoBehaviour
     // 1 = ratusan
     // 0 = ribuan
     private int nextSlotIndex =
-        SlotCount - 1;
+        MaxSlotCount - 1;
 
 
     //==================================================
@@ -77,6 +77,18 @@ public class AnswerSlotInputManager : MonoBehaviour
     // [ ][ ][4][9]
 
     private string normalInput = "";
+
+    private int CurrentSlotCount
+    {
+        get
+        {
+            if (activeAnswerSlotGroup == null)
+                return MaxSlotCount;
+
+            int capacity = activeAnswerSlotGroup.SlotCapacity;
+            return Mathf.Clamp(capacity, 1, MaxSlotCount);
+        }
+    }
 
 
     //==================================================
@@ -105,7 +117,7 @@ public class AnswerSlotInputManager : MonoBehaviour
 
             for (
                 int i = 0;
-                i < SlotCount;
+                i < CurrentSlotCount;
                 i++
             )
             {
@@ -132,7 +144,7 @@ public class AnswerSlotInputManager : MonoBehaviour
             {
                 return
                     normalInput.Length >=
-                    SlotCount;
+                    CurrentSlotCount;
             }
 
 
@@ -161,7 +173,7 @@ public class AnswerSlotInputManager : MonoBehaviour
 
             for (
                 int i = 0;
-                i < SlotCount;
+                i < CurrentSlotCount;
                 i++
             )
             {
@@ -358,7 +370,7 @@ public class AnswerSlotInputManager : MonoBehaviour
     {
         if (
             normalInput.Length >=
-            SlotCount
+            CurrentSlotCount
         )
         {
             return;
@@ -422,7 +434,7 @@ public class AnswerSlotInputManager : MonoBehaviour
 
         for (
             int i = 0;
-            i < SlotCount;
+            i < CurrentSlotCount;
             i++
         )
         {
@@ -454,7 +466,7 @@ public class AnswerSlotInputManager : MonoBehaviour
         //==============================================
 
         int startIndex =
-            SlotCount -
+            CurrentSlotCount -
             normalInput.Length;
 
 
@@ -551,7 +563,7 @@ public class AnswerSlotInputManager : MonoBehaviour
 
         if (
             slotToClear < 0 ||
-            slotToClear >= SlotCount
+            slotToClear >= CurrentSlotCount
         )
         {
             return;
@@ -624,7 +636,7 @@ public class AnswerSlotInputManager : MonoBehaviour
     {
         for (
             int i = 0;
-            i < SlotCount;
+            i < MaxSlotCount;
             i++
         )
         {
@@ -636,7 +648,7 @@ public class AnswerSlotInputManager : MonoBehaviour
 
 
         nextSlotIndex =
-            SlotCount - 1;
+            CurrentSlotCount - 1;
 
 
         normalInput =
@@ -697,7 +709,7 @@ public class AnswerSlotInputManager : MonoBehaviour
 
         for (
             int i = 0;
-            i < SlotCount;
+            i < CurrentSlotCount;
             i++
         )
         {
@@ -747,7 +759,7 @@ public class AnswerSlotInputManager : MonoBehaviour
 
         for (
             int i = 0;
-            i < SlotCount;
+            i < CurrentSlotCount;
             i++
         )
         {
@@ -790,7 +802,7 @@ public class AnswerSlotInputManager : MonoBehaviour
         {
             if (
                 normalInput.Length >=
-                SlotCount
+                CurrentSlotCount
             )
             {
                 activeAnswerSlotGroup
@@ -803,7 +815,7 @@ public class AnswerSlotInputManager : MonoBehaviour
                 // lalu angka sebelumnya bergeser kiri.
                 activeAnswerSlotGroup
                     .SetActiveSlot(
-                        SlotCount - 1
+                        CurrentSlotCount - 1
                     );
             }
 

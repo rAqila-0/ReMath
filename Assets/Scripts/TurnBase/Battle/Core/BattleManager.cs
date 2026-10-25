@@ -119,6 +119,10 @@ public class BattleManager : MonoBehaviour
 
     private bool battleEnded = false;
 
+    // True only when the most recently ended battle ended in defeat.
+    // RetryBattle uses this to distinguish result-screen Retry from pause Retry.
+    private bool battleWasDefeated = false;
+
 
     //==================================================
     // PROPERTIES
@@ -316,6 +320,7 @@ public class BattleManager : MonoBehaviour
         //==============================================
 
         battleEnded = false;
+        battleWasDefeated = false;
         isResolving = false;
         questionActive = false;
 
@@ -957,7 +962,8 @@ public class BattleManager : MonoBehaviour
                     {
                         battleAudio
                             .PlayShieldBlock();
-                    }
+                    },
+                    levelConfig != null && levelConfig.isBoss
                 );
 
 
@@ -994,7 +1000,9 @@ public class BattleManager : MonoBehaviour
 
 
             yield return battleAnimation
-                .PlayEnemyAttackUntilImpact();
+                .PlayEnemyAttackUntilImpact(
+                    levelConfig != null && levelConfig.isBoss
+                );
 
 
             //==============================================
@@ -1041,7 +1049,13 @@ public class BattleManager : MonoBehaviour
 
     private void HandleVictory()
     {
+        // Save the tier/question that actually defeated the enemy before the
+        // battle UI closes. Do not persist the unused next question/tier.
+        if (questionManager != null)
+            questionManager.CommitLevelCompletion();
+
         battleEnded = true;
+        battleWasDefeated = false;
         isResolving = false;
         questionActive = false;
 
@@ -1075,6 +1089,7 @@ public class BattleManager : MonoBehaviour
     private void HandleDefeat()
     {
         battleEnded = true;
+        battleWasDefeated = true;
         isResolving = false;
         questionActive = false;
 
@@ -1103,6 +1118,11 @@ public class BattleManager : MonoBehaviour
 
     public void RetryBattle()
     {
+        // Called from both the pause menu and the defeat result panel.
+        // Pause Retry replays the exact sequence; defeat Retry keeps the tier
+        // reached when the player lost and begins a fresh attempt there.
+        bool retryAfterDefeat = battleEnded && battleWasDefeated;
+
         StopAllCoroutines();
 
         turnPresentation.ResetPresentation();
@@ -1115,6 +1135,7 @@ public class BattleManager : MonoBehaviour
         //==================================================
 
         battleEnded = false;
+        battleWasDefeated = false;
         isResolving = false;
         questionActive = false;
 
@@ -1137,19 +1158,25 @@ public class BattleManager : MonoBehaviour
         // RESTART QUESTION SESSION
         //==================================================
 
-        // PENTING:
-        //
-        // Soal lama TIDAK dihapus.
-        // Index soal kembali ke awal.
-        //
-        // Jadi pertanyaan yang pernah muncul
-        // akan digunakan lagi.
-        questionManager.RestartSessionAttempt();
-
+        // Reset streaks first so QuestionManager persists a clean new attempt.
         if (adaptiveDefenseManager != null)
         {
-            adaptiveDefenseManager
-                .RestartAttemptStreaks();
+            adaptiveDefenseManager.RestartAttemptStreaks();
+        }
+
+        if (retryAfterDefeat)
+        {
+            // Defeat result Retry: keep the tier reached at defeat and begin a
+            // fresh sequence at that tier (do not restore the original tier).
+            questionManager.RestartAfterDefeat();
+            Debug.Log("Retry setelah kalah: melanjutkan dari tier saat kalah.");
+        }
+        else
+        {
+            // Pause Retry: preserve the established behavior and replay the
+            // exact question sequence/tier history from this attempt.
+            questionManager.RestartSessionAttempt();
+            Debug.Log("Retry dari pause: mengulang urutan soal percobaan yang sama.");
         }
 
 

@@ -173,6 +173,17 @@ public class EnemyBattle : MonoBehaviour
             if (heartImages[i] == null)
                 continue;
 
+            // Tampilkan hanya jumlah slot sesuai maxLives level saat ini.
+            // Array boleh berisi 10 heart: level biasa menampilkan 5,
+            // sedangkan boss menampilkan 10.
+            if (i >= maxLives)
+            {
+                heartImages[i].gameObject.SetActive(false);
+                continue;
+            }
+
+            heartImages[i].gameObject.SetActive(true);
+
             // Heart masih aktif
             if (i < currentLives)
             {

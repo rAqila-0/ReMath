@@ -93,13 +93,16 @@ public class DivisionPorogapitRenderer : MonoBehaviour
 
 
         if (
-            question.operandA < 0 ||
-            question.operandB < 1
+            question.operandA < 10 ||
+            question.operandA > 99 ||
+            question.operandB < 1 ||
+            question.operandB > 9
         )
         {
             Debug.LogError(
                 "DivisionPorogapitRenderer: " +
-                "Operand pembagian tidak valid."
+                "Untuk target kelas 3 SD, pembagian harus berupa " +
+                "bilangan 2 digit dibagi bilangan 1 digit (10..99 : 1..9)."
             );
 
             return false;

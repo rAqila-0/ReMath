@@ -72,7 +72,7 @@ public class MultiplicationRenderer : MonoBehaviour
 
 
         //==============================================
-        // VALIDATE RANGE 1 - 10
+        // VALIDATE OPERANDS (GRADE 3 MULTIPLICATION TABLE)
         //==============================================
 
         if (
@@ -84,8 +84,8 @@ public class MultiplicationRenderer : MonoBehaviour
         {
             Debug.LogError(
                 "MultiplicationRenderer: " +
-                "Operand perkalian harus " +
-                "antara 1 sampai 10."
+                "Untuk target kelas 3 SD, kedua faktor perkalian " +
+                "harus berada dalam rentang 1 sampai 10."
             );
 
             return false;
@@ -93,7 +93,7 @@ public class MultiplicationRenderer : MonoBehaviour
 
 
         //==============================================
-        // VALIDATE ANSWER
+        // VALIDATE ANSWER (MAX 10 x 10 = 100)
         //==============================================
 
         int expectedAnswer =

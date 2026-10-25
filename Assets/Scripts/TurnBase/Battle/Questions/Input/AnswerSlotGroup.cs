@@ -3,157 +3,83 @@ using UnityEngine;
 
 public class AnswerSlotGroup : MonoBehaviour
 {
-    //==================================================
-    // SETTINGS
-    //==================================================
+    public const int MaxSupportedSlots = 4;
 
-    public const int SlotCount = 4;
-
-
-    //==================================================
-    // DIGIT TEXT
-    //==================================================
-
-    [Header("Digit Texts - Left to Right")]
-
+    [Header("Digit Texts - Left to Right (4 slots)")]
     [SerializeField]
-    private TMP_Text[] digitTexts =
-        new TMP_Text[SlotCount];
+    private TMP_Text[] digitTexts = new TMP_Text[MaxSupportedSlots];
 
-
-    //==================================================
-    // ACTIVE FRAME
-    //==================================================
-
-    [Header("Active Frames - Left to Right")]
-
+    [Header("Active Frames - Left to Right (same length as Digit Texts)")]
     [SerializeField]
-    private GameObject[] activeFrames =
-        new GameObject[SlotCount];
+    private GameObject[] activeFrames = new GameObject[MaxSupportedSlots];
 
+    /// <summary>
+    /// Capacity follows the arrays assigned in the Inspector, with a maximum
+    /// of four slots. This is enough for 99 x 99 = 9801.
+    /// </summary>
+    public int SlotCapacity
+    {
+        get
+        {
+            int textCount = digitTexts != null ? digitTexts.Length : 0;
+            int frameCount = activeFrames != null ? activeFrames.Length : 0;
 
-    //==================================================
-    // CLEAR ALL
-    //==================================================
+            if (textCount <= 0) return Mathf.Clamp(frameCount, 0, MaxSupportedSlots);
+            if (frameCount <= 0) return Mathf.Clamp(textCount, 0, MaxSupportedSlots);
+
+            return Mathf.Clamp(Mathf.Min(textCount, frameCount), 0, MaxSupportedSlots);
+        }
+    }
 
     public void ClearAll()
     {
-        for (int i = 0; i < SlotCount; i++)
+        if (digitTexts != null)
         {
-            if (
-                digitTexts != null &&
-                i < digitTexts.Length &&
-                digitTexts[i] != null
-            )
+            for (int i = 0; i < digitTexts.Length; i++)
             {
-                digitTexts[i].text = "";
+                if (digitTexts[i] != null)
+                    digitTexts[i].text = string.Empty;
             }
         }
-
 
         ClearActiveSlot();
     }
 
-
-    //==================================================
-    // SET DIGIT
-    //==================================================
-
-    public void SetDigit(
-        int index,
-        string value
-    )
+    public void SetDigit(int index, string value)
     {
-        if (
-            index < 0 ||
-            index >= SlotCount
-        )
-        {
-            return;
-        }
-
-
-        if (
-            digitTexts == null ||
-            index >= digitTexts.Length
-        )
-        {
-            return;
-        }
-
-
-        if (digitTexts[index] == null)
+        if (digitTexts == null || index < 0 || index >= digitTexts.Length || index >= MaxSupportedSlots)
             return;
 
-
-        digitTexts[index].text =
-            value;
+        if (digitTexts[index] != null)
+            digitTexts[index].text = value;
     }
 
-
-    //==================================================
-    // CLEAR DIGIT
-    //==================================================
-
-    public void ClearDigit(
-        int index
-    )
+    public void ClearDigit(int index)
     {
-        SetDigit(
-            index,
-            ""
-        );
+        SetDigit(index, string.Empty);
     }
 
-
-    //==================================================
-    // SET ACTIVE SLOT
-    //==================================================
-
-    public void SetActiveSlot(
-        int activeIndex
-    )
+    public void SetActiveSlot(int activeIndex)
     {
         if (activeFrames == null)
             return;
 
-
-        for (
-            int i = 0;
-            i < activeFrames.Length;
-            i++
-        )
+        for (int i = 0; i < activeFrames.Length; i++)
         {
-            if (activeFrames[i] == null)
-                continue;
-
-
-            activeFrames[i].SetActive(
-                i == activeIndex
-            );
+            if (activeFrames[i] != null)
+                activeFrames[i].SetActive(i == activeIndex);
         }
     }
-
-
-    //==================================================
-    // CLEAR ACTIVE SLOT
-    //==================================================
 
     public void ClearActiveSlot()
     {
         if (activeFrames == null)
             return;
 
-
-        foreach (
-            GameObject frame
-            in activeFrames
-        )
+        for (int i = 0; i < activeFrames.Length; i++)
         {
-            if (frame != null)
-            {
-                frame.SetActive(false);
-            }
+            if (activeFrames[i] != null)
+                activeFrames[i].SetActive(false);
         }
     }
 }
